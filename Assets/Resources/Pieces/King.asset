@@ -1,0 +1,15 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0158f958f9eb5004c9ad27ce2f6e268f, type: 3}
+  m_Name: King
+  m_EditorClassIdentifier: 
+  _piece: {fileID: 1178730755852656131, guid: ef0f27a65ebd8cf41a875508594c45f8, type: 3}
