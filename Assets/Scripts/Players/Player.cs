@@ -24,8 +24,35 @@ public class Player : MonoBehaviour
 
     public bool IsInCheck = false;
 
+    public void TrimChecks()
+    {
+        foreach (Chesspiece piece in _pieces)
+        {
+            List<Tile> legalMovesToRemove = new List<Tile>();
+            foreach (Tile tile in piece.LegalMoves)
+            {
+                GridManager.instance.ResetPredictionBoard();
+                Tile[,] grid = GridManager.instance.PredictionBoard;
+
+                grid[piece.Tile.X, piece.Tile.Y].OccupyingPiece = null;
+                grid[tile.X, tile.Y].OccupyingPiece = piece;
+
+                bool acceptableMove = PlayerManager.instance.CalculateChecksAgainstPlayer(this);
+                
+                if (acceptableMove == false)
+                {
+                    legalMovesToRemove.Add(tile);
+                }
+            }
+
+            piece.LegalMoves.RemoveAll(t => legalMovesToRemove.Contains(t));
+        }
+    }
+
     public void StartTurn()
     {
+        TrimChecks();
+
         if (_isHuman == false)
         {
             StartCoroutine(PlayRandomMove());

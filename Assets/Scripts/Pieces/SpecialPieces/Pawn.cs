@@ -18,14 +18,14 @@ public class Pawn : Chesspiece
         _movementSets.Add((g, t, p) => TypesOfMovement.MoveInDirection(g, t, p, 1, _player.PawnMovementDirection, maxMoves: 1, xMirror: true, mustCapture: true));
     }
 
-    public override void CalculateLegalMoves()
+    public override void CalculateLegalMoves(Tile[,] grid)
     {
-        base.CalculateLegalMoves();
-        FillEnPassantTiles();
+        base.CalculateLegalMoves(grid);
+        FillEnPassantTiles(grid);
         _legalMoves.AddRange(_enPassantTiles.Keys);
     }
 
-    public void FillEnPassantTiles()
+    public void FillEnPassantTiles(Tile[,] grid)
     {
         _enPassantTiles = new Dictionary<Tile, Pawn>();
         int currentY = _tile.Y;
@@ -39,11 +39,11 @@ public class Pawn : Chesspiece
 
         if (_tile.X > 0)
         {
-            tilesToConsider.Add(GridManager.instance.Tiles[_tile.X - 1, _tile.Y]);
+            tilesToConsider.Add(grid[_tile.X - 1, _tile.Y]);
         }
         if (_tile.X < GridManager.instance.Width - 1)
         {
-            tilesToConsider.Add(GridManager.instance.Tiles[_tile.X + 1, _tile.Y]);
+            tilesToConsider.Add(grid[_tile.X + 1, _tile.Y]);
         }
 
         List<Chesspiece> neighboringPawns = tilesToConsider.Select(t => t.OccupyingPiece).Where(

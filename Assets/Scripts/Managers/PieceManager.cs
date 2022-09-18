@@ -13,9 +13,6 @@ public class PieceManager : MonoBehaviour
     public static PieceManager instance;
 
     private List<ScriptablePiece> _pieces;
-
-    private Dictionary<Player, List<Chesspiece>> _spawnedPieces;
-
     private ObservableCollection<Tile> _highlightedTiles;
 
     private Chesspiece _selectedPiece;
@@ -25,7 +22,6 @@ public class PieceManager : MonoBehaviour
     {
         instance = this;
 
-        _spawnedPieces = new Dictionary<Player, List<Chesspiece>>();
         _highlightedTiles = new ObservableCollection<Tile>();
         _highlightedTiles.CollectionChanged += HighlightedTilesChanged;
 
@@ -67,21 +63,17 @@ public class PieceManager : MonoBehaviour
     {
         ScriptablePiece Piece = GetPieceOfType(type);
         Chesspiece instancePiece = Instantiate(Piece.Piece);
+        instancePiece.Type = type;
 
         instancePiece.Init(player, tile);
-        if (_spawnedPieces.ContainsKey(player))
-        {
-            _spawnedPieces[player].Add(instancePiece);
-        }
-        else
-        {
-            _spawnedPieces[player] = new List<Chesspiece> { instancePiece };
-        }
     }
 
-    public List<Chesspiece> GetPiecesForPlayer(Player player)
+    public void CreateCopyOfPiece(Player player, PieceType type, Tile tile)
     {
-        return _spawnedPieces[player];
+        ScriptablePiece Piece = GetPieceOfType(type);
+        Chesspiece instancePiece = Instantiate(Piece.Piece);
+
+
     }
 
     public ScriptablePiece GetPieceOfType(PieceType type)

@@ -63,9 +63,25 @@ public class PlayerManager : MonoBehaviour
         {
             foreach (Chesspiece piece in player.Pieces)
             {
-                piece.CalculateLegalMoves();
+                piece.CalculateLegalMoves(GridManager.instance.Board);
             }
         }
+    }
+
+    public bool CalculateChecksAgainstPlayer(Player player)
+    {
+        bool wasInCheck = player.IsInCheck;
+        foreach (Player otherPlayer in Players.Where(p => p != player))
+        {
+            foreach (Chesspiece piece in player.Pieces)
+            {
+                piece.CalculateLegalMoves(GridManager.instance.PredictionBoard);
+            }
+        }
+
+        bool wouldBeInCheck = player.IsInCheck;
+        player.IsInCheck = wasInCheck;
+        return wouldBeInCheck;
     }
 
     public bool HasPlayer2MovedSincePlayer1Turn(Player player1, Player player2, int turn)

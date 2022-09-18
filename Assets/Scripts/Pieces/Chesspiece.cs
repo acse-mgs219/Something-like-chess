@@ -9,6 +9,8 @@ public abstract class Chesspiece : MonoBehaviour
     [SerializeField] protected SpriteRenderer _renderer;
 
     protected Tile _tile;
+    public Tile Tile => _tile;
+    public PieceType Type;
 
     // Means that capturing this piece ends the game.
     [SerializeField] protected bool _vip;
@@ -23,14 +25,15 @@ public abstract class Chesspiece : MonoBehaviour
     public Color Color => ColorHelper.Instance.GetColor(_player.Color);
 
     protected List<Func<Tile[,], Tile, Player, List<Tile>>> _movementSets;
-    private bool _hasMoved;
-    public bool HasMoved => _hasMoved;
+    public bool HasMoved => History.Moves > 0;
 
     public PieceHistory History;
+    private Chesspiece _predictionCopy;
+    public Chesspiece PredictionCopy => _predictionCopy;
 
-    public virtual void CalculateLegalMoves()
+    public virtual void CalculateLegalMoves(Tile[,] grid)
     {
-        _legalMoves = TypesOfMovement.GetLegalMovesForMovementSets(GridManager.instance.Tiles, _tile, _player, _movementSets);
+        _legalMoves = TypesOfMovement.GetLegalMovesForMovementSets(grid, _tile, _player, _movementSets);
     }
 
     // Should only be called from PieceManager when instantiating piece
@@ -44,6 +47,19 @@ public abstract class Chesspiece : MonoBehaviour
         PlaceAt(tile);
         _renderer.color = Color;
         History = new PieceHistory(tile);
+    }
+
+    public void PlaceCopyOnPredicitonBoard()
+    {
+        ScriptablePiece Piece = PieceManager.instance.GetPieceOfType(Type);
+        Chesspiece instancePiece = Instantiate(Piece.Piece);
+
+        instancePiece._movementSets = _movementSets;
+        instancePiece._player = _player;
+        instancePiece._vip = _vip;
+        Tile tileForCopy = GridManager.instance.PredictionBoard[_tile.X, _tile.Y];
+        instancePiece.PlaceAt(tileForCopy);
+        _predictionCopy = instancePiece;
     }
 
     public void Destroy()
@@ -67,7 +83,7 @@ public abstract class Chesspiece : MonoBehaviour
     {
         _tile = tile;
         _tile.OccupyingPiece = this;
-        transform.position = new Vector3(_tile.X, _tile.Y, transform.position.z);
+        transform.position = new Vector3(_tile.X, _tile.Y, _tile.transform.position.z - 0.1f);
     }
 
     public void MoveTo(Tile tile)
@@ -80,8 +96,7 @@ public abstract class Chesspiece : MonoBehaviour
             _tile = tile;
             _tile.OccupyingPiece?.Destroy();
             _tile.OccupyingPiece = this;
-            transform.position = new Vector3(_tile.X, _tile.Y, transform.position.z);
-            _hasMoved |= true;
+            transform.position = new Vector3(_tile.X, _tile.Y, _tile.transform.position.z - 0.1f);
 
             // Game ends in draw if 50 turns go by without a pawn move.
             if (this is Pawn pawn)
@@ -98,6 +113,52 @@ public abstract class Chesspiece : MonoBehaviour
 
         PieceManager.instance.SetSelectedPiece(null);
     }
+
+    #region CustomEquality
+    public override bool Equals(object other)
+    {
+        return Equals(other as Chesspiece);
+    }
+
+    public virtual bool Equals(Chesspiece other)
+    {
+        if (other == null)
+        {
+            return false; 
+        }
+
+        bool sameType = other.Type == Type;
+        bool sameVIP = other.VIP == VIP;
+        bool samePlayer = other.Player == Player;
+
+        return sameType && sameVIP && samePlayer;
+    }
+
+    public override int GetHashCode()
+    {
+        unchecked // Overflow is fine, just wrap
+        {
+            int hash = 17;
+
+            hash = hash * 23 + Type.GetHashCode();
+            hash = hash * 23 + _vip.GetHashCode();
+            hash = hash * 23 + _player.GetHashCode();
+            return hash;
+        }
+    }
+
+    public static bool operator ==(Chesspiece item1, Chesspiece item2)
+    {
+        if (object.ReferenceEquals(item1, item2)) { return true; }
+        if ((object)item1 == null || (object)item2 == null) { return false; }
+        return item1.Equals(item2);
+    }
+
+    public static bool operator !=(Chesspiece item1, Chesspiece item2)
+    {
+        return !(item1 == item2);
+    }
+    #endregion
 }
 
 public class PieceHistory

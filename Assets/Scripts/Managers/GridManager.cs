@@ -18,8 +18,11 @@ public class GridManager : MonoBehaviour
     // Can make into a list later if want various tile types.
     [SerializeField] private Tile _tilePrefab;
 
-    private Tile[,] _tiles;
-    public Tile[,] Tiles => _tiles;
+    private Tile[,] _board;
+    public Tile[,] Board => _board;
+
+    private Tile[,] _predictionBoard;
+    public Tile[,] PredictionBoard => _predictionBoard;
 
     void Awake()
     {
@@ -28,34 +31,68 @@ public class GridManager : MonoBehaviour
 
     public void Init()
     {
-        _tiles = new Tile[Width, Height];
-        GenerateGrid();
+        _board = new Tile[Width, Height];
+        _predictionBoard = new Tile[Width, Height];
+        // Generate both the real and prediction boards.
+        GenerateGrid(real: true);
+        GenerateGrid(real: false);
 
         _cam.position = new Vector3(_width / 2f - 0.5f, _height / 2f - .5f, -10);
         PlayerManager.instance.Init();
     }
 
-    void GenerateGrid()
+    void GenerateGrid(bool real)
     {
+        Tile[,] _tiles = real ? _board : _predictionBoard;
         for (int x = 0; x < _width; x++)
         {
             for (int y = 0; y < _height; y++)
             {
-                var spawnedTile = Instantiate(_tilePrefab, new Vector3(x, y), Quaternion.identity);
+                // We hide a prediction board behind the real board (very sneaky).
+                var spawnedTile = Instantiate(_tilePrefab, new Vector3(x, y, real ? 0 : 10), Quaternion.identity);
                 spawnedTile.Init(x, y);
                 spawnedTile.name = $"{(char) (x + 65)}{y + 1}";
                 _tiles[x, y] = spawnedTile;
             }
         }
 
-        ReadPieces();
+        if (real) ReadPieces();
 
         PlayerManager.instance.CalculateAllPiecesLegalMoves();
     }
 
-    void ReadPieces()
+    public void ResetPredictionBoard()
     {
-        using (var reader = new StreamReader(@"Assets\Database\board.csv"))
+        for (int x = 0; x < _width; x++)
+        {
+            for (int y = 0; y < _height; y++)
+            {
+                Chesspiece realPiece = _board[x, y].OccupyingPiece;
+                Chesspiece predictionPiece = _predictionBoard[x, y].OccupyingPiece;
+
+                if (realPiece == predictionPiece)
+                {
+                    continue;
+                }
+
+                if (predictionPiece != null)
+                {
+                    _predictionBoard[x, y].OccupyingPiece = null;
+                    Destroy(predictionPiece);
+                }
+
+                if (realPiece != null)
+                {
+                    realPiece.PlaceCopyOnPredicitonBoard();
+                }
+            }
+        }
+    }
+
+    public void ReadPieces(bool real = true)
+    {
+        string piecesLocation = real ? @"Assets\Database\board.csv" : @"Assets\Database\prediction_board.csv";
+        using (var reader = new StreamReader(piecesLocation))
         {
             while (!reader.EndOfStream)
             {
@@ -82,28 +119,38 @@ public class GridManager : MonoBehaviour
         }
     }
 
-    public Tile[,] DeepCopyGrid()
+    public void SaveGridAsCSV(bool real)
     {
-        Tile[,] deepCopy = new Tile[Width,Height];
+        Tile[,] _tiles = real ? _board : _predictionBoard;
 
-        for (int x = 0; x < _width; x++)
+        using (var writer = new StreamWriter(@"Assets\Database\prediction_board.csv"))
         {
-            for (int y = 0; y < _height; y++)
+            foreach (Tile tile in _tiles)
             {
-                deepCopy[x, y] = new Tile() { OccupyingPiece = _tiles[x, y].OccupyingPiece };
+                Chesspiece pieceOnTile = tile.OccupyingPiece;
+                if (pieceOnTile != null)
+                {
+                    int playerIndex = PlayerManager.instance.Players.IndexOf(pieceOnTile.Player) + 1;
+                    string pieceName = pieceOnTile.GetType().Name;
+                    string tileName = tile.name;
+
+                    writer.WriteLine($"{playerIndex}, {pieceName}, {tileName}");
+                }
             }
         }
-
-        return deepCopy;
     }
 
-    public Tile GetTileByName(string name)
+    public Tile GetTileByName(string name, bool real = true)
     {
+        Tile[,] _tiles = real ? _board : _predictionBoard;
+
         return _tiles.Cast<Tile>().First(t => t.name == name);
     }
 
-    public Tile GetTileAtPosition(int x, int y)
+    public Tile GetTileAtPosition(int x, int y, bool real = true)
     {
+        Tile[,] _tiles = real ? _board : _predictionBoard;
+
         if (x < _tiles.GetLength(0) && y < _tiles.GetLength(1))
         {
             return _tiles[x, y];
@@ -115,8 +162,11 @@ public class GridManager : MonoBehaviour
         }
     }
 
-    public List<Tile> GetTilesFittingConstraint(Func<Tile, Boolean> constraint)
+    #region UnusedUtilityFunctions
+    public List<Tile> GetTilesFittingConstraint(Func<Tile, Boolean> constraint, bool real = true)
     {
+        Tile[,] _tiles = real ? _board : _predictionBoard;
+
         return _tiles.Cast<Tile>().Where(t => constraint(t)).ToList();
     }
 
@@ -125,8 +175,10 @@ public class GridManager : MonoBehaviour
         return GetTilesFittingConstraint(constraint).RandomElement();
     }
 
-    public List<Tile> GetNeighborsOfTile(Tile tile, int order = 1)
+    public List<Tile> GetNeighborsOfTile(Tile tile, int order = 1, bool real = true)
     {
+        Tile[,] _tiles = real ? _board : _predictionBoard;
+
         int x = tile.X;
         int y = tile.Y;
         int rowLimit = _tiles.GetLength(0) - 1;
@@ -152,4 +204,5 @@ public class GridManager : MonoBehaviour
     {
         return GetNeighborsOfTile(tile, order).Where(t => constraint == null || constraint(t as Tile)).ToList();
     }
+    #endregion
 }
