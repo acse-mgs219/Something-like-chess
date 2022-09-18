@@ -78,6 +78,7 @@ public abstract class Chesspiece : MonoBehaviour
                 if (this is Pawn pawn)
                 {
                     pawn.HasMoved = true;
+                    GameManager.instance.TurnLimit = GameManager.instance.CurrentTurn + 50;
                 }
 
                 PlayerManager.instance.OnPlayerEndTurn();

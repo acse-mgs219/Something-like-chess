@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
@@ -23,6 +24,12 @@ public class GameManager : MonoBehaviour
 
     public void ChangeState(GameState newState)
     {
+        // The game has ended, do nothing.
+        if (GameState == GameState.EndGame)
+        {
+            return;
+        }
+
         GameState = newState;
         switch (GameState)
         {
@@ -36,6 +43,7 @@ public class GameManager : MonoBehaviour
                 }
                 break;
             case GameState.EndGame:
+                UIManager.instance.AnnounceWinner(PlayerManager.instance.Players.First());
                 break;
         }
     }

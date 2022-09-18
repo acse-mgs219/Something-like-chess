@@ -6,6 +6,9 @@ using static UnityEssentials.Extensions.ColorHelper;
 
 public class Player : MonoBehaviour
 {
+    [SerializeField] string _name;
+    public string Name => _name;
+
     [SerializeField] bool _isHuman;
     public bool IsHuman => _isHuman;
 
