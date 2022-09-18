@@ -7,7 +7,7 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager instance;
     public int TurnLimit;
-    private int _currentTurn = 0;
+    public int CurrentTurn;
 
     public GameState GameState;
 
@@ -29,13 +29,13 @@ public class GameManager : MonoBehaviour
             case GameState.GenerateGrid:
                 GridManager.instance.Init();
                 break;
-            case GameState.PositionPieces:
-                PlayerManager.instance.Init();
-                break;
             case GameState.MakeMoves:
-                // #TODO: alternate player turns
+                if (CurrentTurn < TurnLimit)
+                {
+                    PlayerManager.instance.StartPlayerTurn();
+                }
                 break;
-            case GameState.GoogGame:
+            case GameState.EndGame:
                 break;
         }
     }
@@ -44,7 +44,6 @@ public class GameManager : MonoBehaviour
 public enum GameState
 {
     GenerateGrid,
-    PositionPieces,
     MakeMoves,
-    GoogGame
+    EndGame
 }

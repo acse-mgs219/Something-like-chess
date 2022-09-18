@@ -32,7 +32,7 @@ public class GridManager : MonoBehaviour
         GenerateGrid();
 
         _cam.position = new Vector3(_width / 2f - 0.5f, _height / 2f - .5f, -10);
-        GameManager.instance.ChangeState(GameState.PositionPieces);
+        PlayerManager.instance.Init();
     }
 
     void GenerateGrid()

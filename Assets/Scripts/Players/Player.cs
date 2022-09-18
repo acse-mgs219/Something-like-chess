@@ -15,6 +15,9 @@ public class Player : MonoBehaviour
     private List<Chesspiece> _pieces = new List<Chesspiece>();
     public List<Chesspiece> Pieces => _pieces;
 
+    [SerializeField] int _pawnMovementDirection = -1;
+    public int PpawnMovementDirection => _pawnMovementDirection;
+
     public void StartTurn()
     {
         if (_isHuman == false)

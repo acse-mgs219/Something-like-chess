@@ -12,4 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0158f958f9eb5004c9ad27ce2f6e268f, type: 3}
   m_Name: King
   m_EditorClassIdentifier: 
-  _piece: {fileID: 1178730755852656131, guid: ef0f27a65ebd8cf41a875508594c45f8, type: 3}
+  _piece: {fileID: -8770600323231047417, guid: ef0f27a65ebd8cf41a875508594c45f8, type: 3}

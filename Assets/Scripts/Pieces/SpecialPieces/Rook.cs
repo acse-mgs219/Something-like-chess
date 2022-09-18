@@ -9,19 +9,7 @@ public class Rook : Chesspiece
     {
         base.Init(player, tile);
 
-        _movementSets.Add((t, p) => TypesOfMovement.HorizontalMovement(t, p, true));
-        _movementSets.Add((t, p) => TypesOfMovement.HorizontalMovement(t, p, false));
-        _movementSets.Add((t, p) => TypesOfMovement.VerticalMovement(t, p, true));
-        _movementSets.Add((t, p) => TypesOfMovement.VerticalMovement(t, p, false));
-    }
-
-    public override bool CanCaptureAt(int x, int y)
-    {
-        throw new System.NotImplementedException();
-    }
-
-    public override bool CanMoveTo(int x, int y)
-    {
-        throw new System.NotImplementedException();
+        _movementSets.Add((t, p) => TypesOfMovement.MoveInDirection(t, p, 1, 0, xMirror: true));
+        _movementSets.Add((t, p) => TypesOfMovement.MoveInDirection(t, p, 0, 1, yMirror: true));
     }
 }

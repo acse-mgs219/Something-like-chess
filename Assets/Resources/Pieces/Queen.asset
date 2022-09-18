@@ -12,4 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0158f958f9eb5004c9ad27ce2f6e268f, type: 3}
   m_Name: Queen
   m_EditorClassIdentifier: 
-  _piece: {fileID: 5807413335887794, guid: 5ba4d2bb8772a8d41901e584726b7ea2, type: 3}
+  _piece: {fileID: 5428666806643842891, guid: 5ba4d2bb8772a8d41901e584726b7ea2, type: 3}

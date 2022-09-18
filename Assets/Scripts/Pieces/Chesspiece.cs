@@ -24,9 +24,6 @@ public abstract class Chesspiece : MonoBehaviour
 
     protected List<Func<Tile, Player, List<Tile>>> _movementSets;
 
-    public abstract bool CanMoveTo(int x, int y);
-    public abstract bool CanCaptureAt(int x, int y);
-
     public void CalculateLegalMoves()
     {
         _legalMoves = TypesOfMovement.GetLegalMovesForMovementSets(_tile, _player, _movementSets);
@@ -49,13 +46,15 @@ public abstract class Chesspiece : MonoBehaviour
         _tile.OccupyingPiece = null;
         _tile = null;
         _player.Pieces.Remove(this);
-        _player = null;
 
         if (VIP)
         {
-            GameManager.instance.ChangeState(GameState.GoogGame);
+            _player.Pieces.ForEach(p => Destroy(p));
+            Destroy(_player.gameObject);
+            GameManager.instance.ChangeState(GameState.EndGame);
         }
 
+        _player = null;
         Destroy(gameObject);
     }
 
@@ -71,16 +70,22 @@ public abstract class Chesspiece : MonoBehaviour
             _tile = tile;
             _tile.OccupyingPiece?.Destroy();
             _tile.OccupyingPiece = this;
-            this.transform.position = new Vector3(_tile.X, _tile.Y, this.transform.position.z);
+            transform.position = new Vector3(_tile.X, _tile.Y, transform.position.z);
+
+            // Do not want to move turns while we are still palcing initial pieces!
+            if (forceMove == false)
+            {
+                if (this is Pawn pawn)
+                {
+                    pawn.HasMoved = true;
+                }
+
+                PlayerManager.instance.OnPlayerEndTurn();
+            }
             PlayerManager.instance.CalculateAllPiecesLegalMoves();
+
         }
 
         PieceManager.instance.SetSelectedPiece(null);
-
-        // Do not want to move turns while we are still palcing initial pieces!
-        if (forceMove == false)
-        {
-            PlayerManager.instance.OnPlayerEndTurn();
-        }
     }
 }

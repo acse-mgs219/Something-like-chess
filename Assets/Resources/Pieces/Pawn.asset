@@ -12,4 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0158f958f9eb5004c9ad27ce2f6e268f, type: 3}
   m_Name: Pawn
   m_EditorClassIdentifier: 
-  _piece: {fileID: 3988931388975716670, guid: 4807ea6134a5b6f488d35fcc3bb45386, type: 3}
+  _piece: {fileID: -1135234985722876483, guid: 4807ea6134a5b6f488d35fcc3bb45386, type: 3}

@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2071028545508706546}
   - component: {fileID: 2071028545508706545}
-  - component: {fileID: 2071028545508706544}
+  - component: {fileID: 2131769446873130927}
   m_Layer: 0
   m_Name: Rook
   m_TagString: Untagged
@@ -83,7 +83,7 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &2071028545508706544
+--- !u!114 &2131769446873130927
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

@@ -50,9 +50,10 @@ public class PlayerManager : MonoBehaviour
         if (CurrentActivePlayerIndex >= Players.Count)
         {
             CurrentActivePlayerIndex = 0;
+            GameManager.instance.CurrentTurn++;
         }
 
-        StartPlayerTurn();
+        GameManager.instance.ChangeState(GameState.MakeMoves);
     }
 
     public void CalculateAllPiecesLegalMoves()

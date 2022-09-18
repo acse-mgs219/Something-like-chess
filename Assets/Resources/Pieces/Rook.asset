@@ -12,4 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0158f958f9eb5004c9ad27ce2f6e268f, type: 3}
   m_Name: Rook
   m_EditorClassIdentifier: 
-  _piece: {fileID: 2071028545508706544, guid: 3a571149a19b6014b8bf6cade70e20cf, type: 3}
+  _piece: {fileID: 2131769446873130927, guid: 3a571149a19b6014b8bf6cade70e20cf, type: 3}

@@ -6,81 +6,43 @@ using UnityEngine;
 
 public static class TypesOfMovement
 {
-    public static List<Tile> VerticalMovement(Tile tile, Player player, bool up)
+    public static int DoMove(ref int original, int change)
     {
-        int x = tile.X;
-        int y = tile.Y;
-        Tile[,] tiles = GridManager.instance.Tiles;
-        List<Tile> legalMoves = new List<Tile>();
-
-        Func<int, bool> endCondition;
-
-        if (up)
-        {
-            endCondition = (y => y >= GridManager.instance.Height);
-        }
-        else 
-        {
-            endCondition = (y => y < 0);
-        }
-
-        while (endCondition(up ? ++y : --y) == false)
-        {
-            Tile targetTile = tiles[x, y];
-            Chesspiece piece = targetTile.OccupyingPiece;
-            if (piece is null)
-            {
-                legalMoves.Add(targetTile);
-            }
-            else
-            {
-                if (piece.Player != player)
-                {
-                    legalMoves.Add(targetTile);
-                }
-                break;
-            }
-        }
-
-        return legalMoves;
+        original += change;
+        return original;
     }
 
-    public static List<Tile> HorizontalMovement(Tile tile, Player player, bool right)
+    public static List<Tile> MoveInDirection(Tile tile, Player player, int xMove, int yMove, int maxMoves = -1, bool xMirror = false, bool yMirror = false, bool canCapture = true, bool mustCapture = false, bool stopAtCapture = true)
     {
         int x = tile.X;
         int y = tile.Y;
         Tile[,] tiles = GridManager.instance.Tiles;
         List<Tile> legalMoves = new List<Tile>();
 
-        Func<int, bool> endCondition;
+        Func<int, int, bool> endCondition = ((x, y) => y >= GridManager.instance.Height || y < 0 || x >= GridManager.instance.Width || x < 0);
 
-        if (right)
-        {
-            endCondition = (x => x >= GridManager.instance.Width);
-        }
-        else
-        {
-            endCondition = (x => x < 0);
-        }
-
-        while (endCondition(right ? ++x : --x) == false)
+        int movesMade = 0;
+        while (endCondition(DoMove(ref x, xMove), DoMove(ref y, yMove)) == false && movesMade++ != maxMoves)
         {
             Tile targetTile = tiles[x, y];
             Chesspiece piece = targetTile.OccupyingPiece;
-
             if (piece is null)
             {
-                legalMoves.Add(targetTile);
+                if (mustCapture == false) legalMoves.Add(targetTile);
             }
             else
             {
                 if (piece.Player != player)
                 {
-                    legalMoves.Add(targetTile);
+                    if (canCapture) legalMoves.Add(targetTile);
                 }
-                break;
+                if (stopAtCapture) break;
             }
         }
+
+        if (xMirror) legalMoves.AddRange(MoveInDirection(tile, player, -xMove, yMove, maxMoves, false, false, canCapture, mustCapture, stopAtCapture));
+        if (yMirror) legalMoves.AddRange(MoveInDirection(tile, player, xMove, -yMove, maxMoves, false, false, canCapture, mustCapture, stopAtCapture));
+        if (xMirror && yMirror) legalMoves.AddRange(MoveInDirection(tile, player, -xMove, -yMove, maxMoves, false, false, canCapture, mustCapture, stopAtCapture));
 
         return legalMoves;
     }

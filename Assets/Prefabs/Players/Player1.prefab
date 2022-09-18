@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 4041106723932573851}
   - component: {fileID: 2840625992291167758}
   m_Layer: 0
-  m_Name: PlayerBlack
+  m_Name: Player1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -43,5 +43,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 82e456274d0b5d74385ccde2f2bf2dcc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _isHuman: 0
-  _color: 355
+  _isHuman: 1
+  _color: 76
+  _pawnMovementDirection: 1
