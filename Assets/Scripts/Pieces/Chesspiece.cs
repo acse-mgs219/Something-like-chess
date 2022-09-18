@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using UnityEngine;
 using UnityEssentials.Extensions;
 
@@ -28,7 +29,7 @@ public abstract class Chesspiece : MonoBehaviour
     public bool HasMoved => History.Moves > 0;
 
     public PieceHistory History;
-    private Chesspiece _predictionCopy;
+    protected Chesspiece _predictionCopy;
     public Chesspiece PredictionCopy => _predictionCopy;
 
     public virtual void CalculateLegalMoves(Tile[,] grid)
@@ -49,24 +50,31 @@ public abstract class Chesspiece : MonoBehaviour
         History = new PieceHistory(tile);
     }
 
-    public void PlaceCopyOnPredicitonBoard()
+    public virtual void PlaceCopyOnPredicitonBoard()
     {
-        ScriptablePiece Piece = PieceManager.instance.GetPieceOfType(Type);
-        Chesspiece instancePiece = Instantiate(Piece.Piece);
+        if (_predictionCopy == null)
+        {
+            ScriptablePiece Piece = PieceManager.instance.GetPieceOfType(Type);
+            Chesspiece instancePiece = Instantiate(Piece.Piece);
 
-        instancePiece._movementSets = _movementSets;
-        instancePiece._player = _player;
-        instancePiece._vip = _vip;
-        Tile tileForCopy = GridManager.instance.PredictionBoard[_tile.X, _tile.Y];
-        instancePiece.PlaceAt(tileForCopy);
-        _predictionCopy = instancePiece;
+            instancePiece._movementSets = _movementSets;
+            instancePiece._player = _player;
+            instancePiece._vip = _vip;
+            Tile tileForCopy = GridManager.instance.PredictionBoard[_tile.X, _tile.Y];
+            instancePiece.CopyTo(tileForCopy);
+            _predictionCopy = instancePiece;
+        }
+        else
+        {
+            Tile tileForCopy = GridManager.instance.PredictionBoard[_tile.X, _tile.Y];
+            _predictionCopy.CopyTo(tileForCopy);
+        }
     }
 
     public void Destroy()
     {
         _tile.OccupyingPiece = null;
         _tile = null;
-        _player.Pieces.Remove(this);
 
         if (VIP)
         {
@@ -75,90 +83,59 @@ public abstract class Chesspiece : MonoBehaviour
             GameManager.instance.ChangeState(GameState.EndGame);
         }
 
+        if (_predictionCopy != null)
+        {
+            _player.Pieces.Remove(this);
+            _predictionCopy.Destroy();
+        }
+
         _player = null;
         Destroy(gameObject);
+    }
+
+    public void CopyTo(Tile tile)
+    {
+        if (_tile?.OccupyingPiece != null) _tile.OccupyingPiece = null;
+
+        _tile = tile;
+        _tile.OccupyingPiece = this;
+        transform.position = new Vector3(_tile.X, _tile.Y, 15f);
     }
 
     public void PlaceAt(Tile tile)
     {
         _tile = tile;
         _tile.OccupyingPiece = this;
-        transform.position = new Vector3(_tile.X, _tile.Y, _tile.transform.position.z - 0.1f);
+        transform.position = new Vector3(_tile.X, _tile.Y, -1f);
     }
 
-    public void MoveTo(Tile tile)
+    public void MoveTo(Tile tile, bool prediction = false)
     {
-        if (_legalMoves.Contains(tile))
+        if (prediction || _legalMoves.Contains(tile))
         {
-            History.RecordMove(tile);
+            if (!prediction) History.RecordMove(tile);
 
             _tile.OccupyingPiece = null;
             _tile = tile;
-            _tile.OccupyingPiece?.Destroy();
+            if (!prediction) _tile.OccupyingPiece?.Destroy();
             _tile.OccupyingPiece = this;
-            transform.position = new Vector3(_tile.X, _tile.Y, _tile.transform.position.z - 0.1f);
+            transform.position = new Vector3(_tile.X, _tile.Y, transform.position.z);
 
             // Game ends in draw if 50 turns go by without a pawn move.
             if (this is Pawn pawn)
             {
-                GameManager.instance.TurnLimit = GameManager.instance.CurrentTurn + 50;
+                if (!prediction) GameManager.instance.TurnLimit = GameManager.instance.CurrentTurn + 50;
                 if (pawn.EnPassantTiles.TryGetValue(tile, out Pawn passedPawn))
                 {
                     passedPawn.Destroy();
                 }
             }
 
-            PlayerManager.instance.OnPlayerEndTurn();
+            if (!prediction) PlayerManager.instance.OnPlayerEndTurn();
         }
 
-        PieceManager.instance.SetSelectedPiece(null);
+        if (!prediction) PieceManager.instance.SetSelectedPiece(null);
     }
-
-    #region CustomEquality
-    public override bool Equals(object other)
-    {
-        return Equals(other as Chesspiece);
-    }
-
-    public virtual bool Equals(Chesspiece other)
-    {
-        if (other == null)
-        {
-            return false; 
-        }
-
-        bool sameType = other.Type == Type;
-        bool sameVIP = other.VIP == VIP;
-        bool samePlayer = other.Player == Player;
-
-        return sameType && sameVIP && samePlayer;
-    }
-
-    public override int GetHashCode()
-    {
-        unchecked // Overflow is fine, just wrap
-        {
-            int hash = 17;
-
-            hash = hash * 23 + Type.GetHashCode();
-            hash = hash * 23 + _vip.GetHashCode();
-            hash = hash * 23 + _player.GetHashCode();
-            return hash;
-        }
-    }
-
-    public static bool operator ==(Chesspiece item1, Chesspiece item2)
-    {
-        if (object.ReferenceEquals(item1, item2)) { return true; }
-        if ((object)item1 == null || (object)item2 == null) { return false; }
-        return item1.Equals(item2);
-    }
-
-    public static bool operator !=(Chesspiece item1, Chesspiece item2)
-    {
-        return !(item1 == item2);
-    }
-    #endregion
 }
 
 public class PieceHistory

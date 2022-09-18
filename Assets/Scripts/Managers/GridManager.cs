@@ -57,34 +57,15 @@ public class GridManager : MonoBehaviour
         }
 
         if (real) ReadPieces();
-
-        PlayerManager.instance.CalculateAllPiecesLegalMoves();
     }
 
     public void ResetPredictionBoard()
     {
-        for (int x = 0; x < _width; x++)
+        foreach (Player player in PlayerManager.instance.Players)
         {
-            for (int y = 0; y < _height; y++)
+            foreach (Chesspiece piece in player.Pieces)
             {
-                Chesspiece realPiece = _board[x, y].OccupyingPiece;
-                Chesspiece predictionPiece = _predictionBoard[x, y].OccupyingPiece;
-
-                if (realPiece == predictionPiece)
-                {
-                    continue;
-                }
-
-                if (predictionPiece != null)
-                {
-                    _predictionBoard[x, y].OccupyingPiece = null;
-                    Destroy(predictionPiece);
-                }
-
-                if (realPiece != null)
-                {
-                    realPiece.PlaceCopyOnPredicitonBoard();
-                }
+                piece.PlaceCopyOnPredicitonBoard();
             }
         }
     }

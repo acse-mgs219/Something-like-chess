@@ -7,7 +7,7 @@ using UnityEssentials.Extensions;
 
 public class Pawn : Chesspiece
 {
-    private Dictionary<Tile, Pawn> _enPassantTiles;
+    private Dictionary<Tile, Pawn> _enPassantTiles = new Dictionary<Tile, Pawn>();
     public Dictionary<Tile, Pawn> EnPassantTiles => _enPassantTiles;
 
     public override void Init(Player player, Tile tile)
@@ -58,7 +58,7 @@ public class Pawn : Chesspiece
 
         foreach (Pawn pawn in neighboringPawns)
         {
-            List<Tile> historyTiles = pawn.History.OccupiedTiles;
+            List<Tile> historyTiles = pawn.History?.OccupiedTiles ?? new List<Tile>();
             if (historyTiles.Count < 2)
             {
                 continue;
@@ -71,5 +71,11 @@ public class Pawn : Chesspiece
                 _enPassantTiles[GridManager.instance.GetTileAtPosition(pawn._tile.X, (currentY + lastY) / 2)] = pawn;
             }
         }
+    }
+
+    public override void PlaceCopyOnPredicitonBoard()
+    {
+        base.PlaceCopyOnPredicitonBoard();
+        (_predictionCopy as Pawn)._enPassantTiles = _enPassantTiles;
     }
 }

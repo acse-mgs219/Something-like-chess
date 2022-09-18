@@ -28,24 +28,24 @@ public class Player : MonoBehaviour
     {
         foreach (Chesspiece piece in _pieces)
         {
-            List<Tile> legalMovesToRemove = new List<Tile>();
+            List<Tile> tilesToRemove = new List<Tile>();
             foreach (Tile tile in piece.LegalMoves)
             {
                 GridManager.instance.ResetPredictionBoard();
                 Tile[,] grid = GridManager.instance.PredictionBoard;
 
-                grid[piece.Tile.X, piece.Tile.Y].OccupyingPiece = null;
-                grid[tile.X, tile.Y].OccupyingPiece = piece;
+                Tile predictionTargetTile = grid[tile.X, tile.Y];
+                piece.PredictionCopy.MoveTo(predictionTargetTile, prediction: true);
 
-                bool acceptableMove = PlayerManager.instance.CalculateChecksAgainstPlayer(this);
-                
-                if (acceptableMove == false)
+                bool dangerousMove = PlayerManager.instance.CalculateChecksAgainstPlayer(this);
+
+                if (dangerousMove)
                 {
-                    legalMovesToRemove.Add(tile);
+                    tilesToRemove.Add(tile);
                 }
             }
 
-            piece.LegalMoves.RemoveAll(t => legalMovesToRemove.Contains(t));
+            piece.LegalMoves.RemoveAll(t => tilesToRemove.Contains(t));
         }
     }
 

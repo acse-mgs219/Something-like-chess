@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -39,6 +40,7 @@ public class PlayerManager : MonoBehaviour
 
     public void StartPlayerTurn()
     {
+        PlayerManager.instance.CalculateAllPiecesLegalMoves();
         CurrentActivePlayer.StartTurn();
     }
 
@@ -52,7 +54,6 @@ public class PlayerManager : MonoBehaviour
             CurrentActivePlayerIndex = 0;
             GameManager.instance.CurrentTurn++;
         }
-        CalculateAllPiecesLegalMoves();
 
         GameManager.instance.ChangeState(GameState.MakeMoves);
     }
@@ -70,10 +71,19 @@ public class PlayerManager : MonoBehaviour
 
     public bool CalculateChecksAgainstPlayer(Player player)
     {
+        player.IsInCheck = false;
         bool wasInCheck = player.IsInCheck;
         foreach (Player otherPlayer in Players.Where(p => p != player))
         {
-            foreach (Chesspiece piece in player.Pieces)
+            List<Chesspiece> predictionPieces = otherPlayer.Pieces.Select(p => p.PredictionCopy).ToList();
+            List<Chesspiece> troublesomePieces = predictionPieces.Where(p => p.Tile == null).ToList();
+
+            if (troublesomePieces.Count > 0)
+            {
+                Debugger.Log(0, "adawefa", "Troublesome piece detected");
+            }
+
+            foreach (Chesspiece piece in predictionPieces)
             {
                 piece.CalculateLegalMoves(GridManager.instance.PredictionBoard);
             }
