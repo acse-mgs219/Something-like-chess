@@ -47,13 +47,13 @@ public class Tile : MonoBehaviour
     {
         if (set)
         {
-            if (OccupyingPiece is null)
+            if (OccupyingPiece != null || (forPiece is Pawn pawn && pawn.EnPassantTiles.ContainsKey(this)))
             {
-                SetMoveIndicator(set, forPiece);
+                SetCaptureIndicator(set, forPiece);
             }
             else
             {
-                SetCaptureIndicator(set, forPiece);
+                SetMoveIndicator(set, forPiece);
             }
         }
         else

@@ -38,20 +38,21 @@ public class PlayerManager : MonoBehaviour
     }
 
     public void StartPlayerTurn()
-    { 
-        Player activePlayer = Players[CurrentActivePlayerIndex];
-
-        activePlayer.StartTurn();
+    {
+        CurrentActivePlayer.StartTurn();
     }
 
     public void OnPlayerEndTurn()
     {
+        CurrentActivePlayer.IsInCheck = false;
+
         CurrentActivePlayerIndex++;
         if (CurrentActivePlayerIndex >= Players.Count)
         {
             CurrentActivePlayerIndex = 0;
             GameManager.instance.CurrentTurn++;
         }
+        CalculateAllPiecesLegalMoves();
 
         GameManager.instance.ChangeState(GameState.MakeMoves);
     }
@@ -65,5 +66,27 @@ public class PlayerManager : MonoBehaviour
                 piece.CalculateLegalMoves();
             }
         }
+    }
+
+    public bool HasPlayer2MovedSincePlayer1Turn(Player player1, Player player2, int turn)
+    {
+        int currentTurn = GameManager.instance.CurrentTurn;
+
+        if (turn > currentTurn || (turn == currentTurn && CurrentActivePlayerIndex < Players.IndexOf(player1)))
+        {
+            return false;
+        }
+
+        if (turn == currentTurn)
+        {
+            return CurrentActivePlayerIndex > Players.IndexOf(player2);
+        }
+
+        if (turn == currentTurn - 1)
+        {
+            return Players.IndexOf(player2) > Players.IndexOf(player1);
+        }
+
+        return true;
     }
 }

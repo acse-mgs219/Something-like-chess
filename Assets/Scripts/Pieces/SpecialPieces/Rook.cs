@@ -9,7 +9,7 @@ public class Rook : Chesspiece
     {
         base.Init(player, tile);
 
-        _movementSets.Add((t, p) => TypesOfMovement.MoveInDirection(t, p, 1, 0, xMirror: true));
-        _movementSets.Add((t, p) => TypesOfMovement.MoveInDirection(t, p, 0, 1, yMirror: true));
+        _movementSets.Add((g, t, p) => TypesOfMovement.MoveInDirection(g, t, p, 1, 0, xMirror: true));
+        _movementSets.Add((g, t, p) => TypesOfMovement.MoveInDirection(g, t, p, 0, 1, yMirror: true));
     }
 }

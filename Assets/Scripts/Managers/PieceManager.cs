@@ -35,9 +35,7 @@ public class PieceManager : MonoBehaviour
     public void SetSelectedPiece(Chesspiece Piece)
     {
         _selectedPiece = Piece;
-        // #TODO: UI // MenuManager.instance.ShowSelectedPiece(_selectedPiece);
 
-        // #TODO: Cache legal moves per turn
         _highlightedTiles.RemoveIf(ht => (_selectedPiece?.LegalMoves?.Contains(ht) ?? false) == false);
 
         if (_selectedPiece != null)

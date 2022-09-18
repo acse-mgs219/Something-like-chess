@@ -22,23 +22,28 @@ public abstract class Chesspiece : MonoBehaviour
 
     public Color Color => ColorHelper.Instance.GetColor(_player.Color);
 
-    protected List<Func<Tile, Player, List<Tile>>> _movementSets;
+    protected List<Func<Tile[,], Tile, Player, List<Tile>>> _movementSets;
+    private bool _hasMoved;
+    public bool HasMoved => _hasMoved;
 
-    public void CalculateLegalMoves()
+    public PieceHistory History;
+
+    public virtual void CalculateLegalMoves()
     {
-        _legalMoves = TypesOfMovement.GetLegalMovesForMovementSets(_tile, _player, _movementSets);
+        _legalMoves = TypesOfMovement.GetLegalMovesForMovementSets(GridManager.instance.Tiles, _tile, _player, _movementSets);
     }
 
     // Should only be called from PieceManager when instantiating piece
     // #TODO: Surely there is a way to give constructor arguments in Unity
     public virtual void Init(Player player, Tile tile)
     {
-        _movementSets = new List<Func<Tile, Player, List<Tile>>>();
+        _movementSets = new List<Func<Tile[,], Tile, Player, List<Tile>>>();
         _player = player;
         _player.Pieces.Add(this);
 
-        MoveTo(tile, forceMove: true);
+        PlaceAt(tile);
         _renderer.color = Color;
+        History = new PieceHistory(tile);
     }
 
     public void Destroy()
@@ -58,35 +63,63 @@ public abstract class Chesspiece : MonoBehaviour
         Destroy(gameObject);
     }
 
-    public void MoveTo(Tile tile, bool forceMove = false)
+    public void PlaceAt(Tile tile)
     {
-        if (forceMove || _legalMoves.Contains(tile))
-        {
-            if (_tile != null)
-            {
-                _tile.OccupyingPiece = null;
-            }
+        _tile = tile;
+        _tile.OccupyingPiece = this;
+        transform.position = new Vector3(_tile.X, _tile.Y, transform.position.z);
+    }
 
+    public void MoveTo(Tile tile)
+    {
+        if (_legalMoves.Contains(tile))
+        {
+            History.RecordMove(tile);
+
+            _tile.OccupyingPiece = null;
             _tile = tile;
             _tile.OccupyingPiece?.Destroy();
             _tile.OccupyingPiece = this;
             transform.position = new Vector3(_tile.X, _tile.Y, transform.position.z);
+            _hasMoved |= true;
 
-            // Do not want to move turns while we are still palcing initial pieces!
-            if (forceMove == false)
+            // Game ends in draw if 50 turns go by without a pawn move.
+            if (this is Pawn pawn)
             {
-                if (this is Pawn pawn)
+                GameManager.instance.TurnLimit = GameManager.instance.CurrentTurn + 50;
+                if (pawn.EnPassantTiles.TryGetValue(tile, out Pawn passedPawn))
                 {
-                    pawn.HasMoved = true;
-                    GameManager.instance.TurnLimit = GameManager.instance.CurrentTurn + 50;
+                    passedPawn.Destroy();
                 }
-
-                PlayerManager.instance.OnPlayerEndTurn();
             }
-            PlayerManager.instance.CalculateAllPiecesLegalMoves();
 
+            PlayerManager.instance.OnPlayerEndTurn();
         }
 
         PieceManager.instance.SetSelectedPiece(null);
+    }
+}
+
+public class PieceHistory
+{
+    public List<Tile> OccupiedTiles { get; private set; }
+    public List<Chesspiece> CapturedPieces { get; private set; }
+    public List<int> MoveTurns { get; private set; }
+    public int Moves { get; private set; }
+
+    public PieceHistory(Tile tile)
+    {
+        OccupiedTiles = new List<Tile>() { tile };
+        CapturedPieces = new List<Chesspiece>();
+        MoveTurns = new List<int>() { 0 };
+        Moves = 0;
+    }
+
+    public void RecordMove(Tile toTile)
+    {
+        OccupiedTiles.Add(toTile);
+        if (toTile.OccupyingPiece != null) CapturedPieces.Add(toTile.OccupyingPiece);
+        MoveTurns.Add(GameManager.instance.CurrentTurn);
+        Moves++;
     }
 }

@@ -209,7 +209,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _colors:
   - {r: 1, g: 1, b: 1, a: 1}
-  - {r: 0.08962262, g: 0.10822996, b: 1, a: 1}
+  - {r: 0.016197944, g: 0.49056602, b: 0.07943701, a: 1}
   _renderer: {fileID: 575247497190394878}
   _highlight: {fileID: 575247497144423597}
   _moveIndicator: {fileID: 6045186043883474968}

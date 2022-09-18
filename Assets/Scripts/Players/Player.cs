@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using static UnityEssentials.Extensions.ColorHelper;
 
@@ -19,7 +20,9 @@ public class Player : MonoBehaviour
     public List<Chesspiece> Pieces => _pieces;
 
     [SerializeField] int _pawnMovementDirection = -1;
-    public int PpawnMovementDirection => _pawnMovementDirection;
+    public int PawnMovementDirection => _pawnMovementDirection;
+
+    public bool IsInCheck = false;
 
     public void StartTurn()
     {

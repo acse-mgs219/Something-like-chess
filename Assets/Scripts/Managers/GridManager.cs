@@ -49,6 +49,8 @@ public class GridManager : MonoBehaviour
         }
 
         ReadPieces();
+
+        PlayerManager.instance.CalculateAllPiecesLegalMoves();
     }
 
     void ReadPieces()
@@ -78,6 +80,21 @@ public class GridManager : MonoBehaviour
                 PieceManager.instance.SpawnPieceAtTile(player, type, tile);
             }
         }
+    }
+
+    public Tile[,] DeepCopyGrid()
+    {
+        Tile[,] deepCopy = new Tile[Width,Height];
+
+        for (int x = 0; x < _width; x++)
+        {
+            for (int y = 0; y < _height; y++)
+            {
+                deepCopy[x, y] = new Tile() { OccupyingPiece = _tiles[x, y].OccupyingPiece };
+            }
+        }
+
+        return deepCopy;
     }
 
     public Tile GetTileByName(string name)
