@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using UnityEngine;
 using UnityEssentials.Extensions;
 
@@ -17,15 +18,15 @@ public abstract class Chesspiece : MonoBehaviour
     [SerializeField] protected bool _vip;
     public bool VIP => _vip;
 
-    protected List<Tile> _legalMoves;
-    public List<Tile> LegalMoves => _legalMoves;
+    protected List<Move> _legalMoves;
+    public List<Move> LegalMoves => _legalMoves;
 
     protected Player _player;
     public Player Player => _player;
 
     public Color Color => ColorHelper.Instance.GetColor(_player.Color);
 
-    protected List<Func<Tile[,], Tile, Player, List<Tile>>> _movementSets;
+    protected List<Func<Tile[,], Tile, Player, List<Move>>> _movementSets;
     public bool HasMoved => History.Moves > 0;
 
     public PieceHistory History;
@@ -43,7 +44,7 @@ public abstract class Chesspiece : MonoBehaviour
     // #TODO: Surely there is a way to give constructor arguments in Unity
     public virtual void Init(Player player, Tile tile)
     {
-        _movementSets = new List<Func<Tile[,], Tile, Player, List<Tile>>>();
+        _movementSets = new List<Func<Tile[,], Tile, Player, List<Move>>>();
         _player = player;
         _player.Pieces.Add(this);
 
@@ -107,69 +108,68 @@ public abstract class Chesspiece : MonoBehaviour
 
     public void MoveTo(Tile tile)
     {
-        if (_isPredictionCopy)
+        Move toMove = _legalMoves.FirstOrDefault(m => m.ToTile == tile);
+        if (toMove != null)
         {
-            PredictionMoveTo(tile);
+            PerformMove(toMove);
         }
         else
         {
-            RealMoveTo(tile);
+            PieceManager.instance.SetSelectedPiece(null);
         }
     }
 
-    private void PredictionMoveTo(Tile tile)
+    public void PerformMove(Move move)
+    {
+        if (_isPredictionCopy)
+        {
+            PredictionMove(move);
+        }
+        else
+        {
+            RealMove(move);
+        }
+    }
+
+    private void PredictionMove(Move move)
     {
         _tile.OccupyingPiece = null;
 
-        _tile = tile;
+        _tile = GridManager.instance.ConvertRealTileToPrediction(move.ToTile);
+        _tile.OccupyingPiece = this;
+        transform.position = new Vector3(_tile.X, _tile.Y, transform.position.z);
+    }
+
+    private void RealMove(Move move)
+    {
+
+        History.RecordMove(move);
+
+        _tile.OccupyingPiece = null;
+            
+        _tile = move.ToTile;
+
+        if (move.Castle == false && move.TargetPiece != null)
+        {
+            move.TargetPiece.Destroy();
+        }
         _tile.OccupyingPiece = this;
         transform.position = new Vector3(_tile.X, _tile.Y, transform.position.z);
 
         // Game ends in draw if 50 turns go by without a pawn move.
-        if (this is Pawn pawn)
+        if (this is Pawn)
         {
-            if (pawn.EnPassantTiles.TryGetValue(tile, out Pawn passedPawn))
-            {
-                passedPawn.Destroy();
-            }
+            GameManager.instance.TurnLimit = GameManager.instance.CurrentTurn + 50;
         }
-    }
 
-    private void RealMoveTo(Tile tile)
-    {
-        if (_legalMoves.Contains(tile))
-        {
-            History.RecordMove(tile);
-
-            _tile.OccupyingPiece = null;
-            
-            _tile = tile;
-            _tile.OccupyingPiece?.Destroy();
-            _tile.OccupyingPiece = this;
-            transform.position = new Vector3(_tile.X, _tile.Y, transform.position.z);
-
-            // Game ends in draw if 50 turns go by without a pawn move.
-            if (this is Pawn pawn)
-            {
-                GameManager.instance.TurnLimit = GameManager.instance.CurrentTurn + 50;
-                if (pawn.EnPassantTiles.TryGetValue(tile, out Pawn passedPawn))
-                {
-                    passedPawn.Destroy();
-                }
-            }
-
-            PieceManager.instance.SetSelectedPiece(null);
-            PlayerManager.instance.OnPlayerEndTurn();
-        }
-        else
-        {
-            PieceManager.instance.SetSelectedPiece(null);
-        }
+        PieceManager.instance.SetSelectedPiece(null);
+        PlayerManager.instance.OnPlayerEndTurn();
     }
 }
 
 public class PieceHistory
 {
+    public List<Move> PlayedMoves { get; private set; }
     public List<Tile> OccupiedTiles { get; private set; }
     public List<Chesspiece> CapturedPieces { get; private set; }
     public List<int> MoveTurns { get; private set; }
@@ -177,16 +177,21 @@ public class PieceHistory
 
     public PieceHistory(Tile tile)
     {
+        PlayedMoves = new List<Move>();
         OccupiedTiles = new List<Tile>() { tile };
         CapturedPieces = new List<Chesspiece>();
         MoveTurns = new List<int>() { 0 };
         Moves = 0;
     }
 
-    public void RecordMove(Tile toTile)
+    public void RecordMove(Move move)
     {
-        OccupiedTiles.Add(toTile);
-        if (toTile.OccupyingPiece != null) CapturedPieces.Add(toTile.OccupyingPiece);
+        PlayedMoves.Add(move);
+        OccupiedTiles.Add(move.ToTile);
+        if (move.TargetPiece != null && move.Castle == false)
+        {
+            CapturedPieces.Add(move.TargetPiece);
+        }
         MoveTurns.Add(GameManager.instance.CurrentTurn);
         Moves++;
     }

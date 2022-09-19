@@ -6,17 +6,18 @@ using UnityEngine;
 
 public static class TypesOfMovement
 {
+    // Basically does ++x except can increment by any value, not just +/- 1.
     public static int DoMove(ref int original, int change)
     {
         original += change;
         return original;
     }
 
-    public static List<Tile> MoveInDirection(Tile[,] grid, Tile tile, Player player, int xMove, int yMove, int maxMoves = -1, bool xMirror = false, bool yMirror = false, bool canCapture = true, bool mustCapture = false, bool stopAtCapture = true)
+    public static List<Move> MoveInDirection(Tile[,] grid, Tile tile, Player player, int xMove, int yMove, int maxMoves = -1, bool xMirror = false, bool yMirror = false, bool canCapture = true, bool mustCapture = false, bool stopAtCapture = true)
     {
         int x = tile.X;
         int y = tile.Y;
-        List<Tile> legalMoves = new List<Tile>();
+        List<Move> legalMoves = new List<Move>();
 
         Func<int, int, bool> endCondition = ((x, y) => y >= GridManager.instance.Height || y < 0 || x >= GridManager.instance.Width || x < 0);
 
@@ -27,7 +28,10 @@ public static class TypesOfMovement
             Chesspiece piece = targetTile.OccupyingPiece;
             if (piece is null)
             {
-                if (mustCapture == false) legalMoves.Add(targetTile);
+                if (mustCapture == false)
+                {
+                    legalMoves.Add(new Move(targetTile, tile));
+                }
             }
             else
             {
@@ -35,7 +39,7 @@ public static class TypesOfMovement
                 {
                     if (canCapture)
                     {
-                        legalMoves.Add(targetTile);
+                        legalMoves.Add(new Move(targetTile, tile, piece));
                         if (piece.VIP == true)
                         {
                             piece.Player.IsInCheck = true;
@@ -53,9 +57,9 @@ public static class TypesOfMovement
         return legalMoves;
     }
 
-    public static List<Tile> GetLegalMovesForMovementSets(Tile[,] grid, Tile tile, Player player, List<Func<Tile[,], Tile, Player, List<Tile>>> sets)
+    public static List<Move> GetLegalMovesForMovementSets(Tile[,] grid, Tile tile, Player player, List<Func<Tile[,], Tile, Player, List<Move>>> sets)
     {
-        List<Tile> legalMoves = new List<Tile>();
+        List<Move> legalMoves = new List<Move>();
 
         foreach (var movementSet in sets)
         {

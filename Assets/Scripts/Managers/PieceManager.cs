@@ -32,15 +32,15 @@ public class PieceManager : MonoBehaviour
     {
         _selectedPiece = Piece;
 
-        _highlightedTiles.RemoveIf(ht => (_selectedPiece?.LegalMoves?.Contains(ht) ?? false) == false);
+        _highlightedTiles.RemoveIf(ht => (_selectedPiece?.LegalMoves?.Any(m => m.ToTile == ht) ?? false) == false);
 
         if (_selectedPiece != null)
         {
-            foreach (Tile tile in _selectedPiece.LegalMoves)
+            foreach (Move move in _selectedPiece.LegalMoves)
             {
-                if (_highlightedTiles.Contains(tile) == false)
+                if (_highlightedTiles.Contains(move.ToTile) == false)
                 {
-                    _highlightedTiles.Add(tile);
+                    _highlightedTiles.Add(move.ToTile);
                 }
             }
         }

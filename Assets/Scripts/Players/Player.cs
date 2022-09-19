@@ -28,24 +28,23 @@ public class Player : MonoBehaviour
     {
         foreach (Chesspiece piece in _pieces)
         {
-            List<Tile> tilesToRemove = new List<Tile>();
-            foreach (Tile tile in piece.LegalMoves)
+            List<Move> movesToRemove = new List<Move>();
+            foreach (Move move in piece.LegalMoves)
             {
                 GridManager.instance.ResetPredictionBoard();
                 Tile[,] grid = GridManager.instance.PredictionBoard;
 
-                Tile predictionTargetTile = grid[tile.X, tile.Y];
-                piece.PredictionCopy.MoveTo(predictionTargetTile);
+                piece.PredictionCopy.PerformMove(move);
 
                 bool dangerousMove = PlayerManager.instance.CalculateChecksAgainstPlayer(this);
 
                 if (dangerousMove)
                 {
-                    tilesToRemove.Add(tile);
+                    movesToRemove.Add(move);
                 }
             }
 
-            piece.LegalMoves.RemoveAll(t => tilesToRemove.Contains(t));
+            piece.LegalMoves.RemoveAll(t => movesToRemove.Contains(t));
         }
     }
 
@@ -72,7 +71,7 @@ public class Player : MonoBehaviour
 
             yield return new WaitForSeconds(2);
 
-            pieceToMove.MoveTo(pieceToMove.LegalMoves.RandomElement());
+            pieceToMove.PerformMove(pieceToMove.LegalMoves.RandomElement());
             break;
         }
     }

@@ -47,7 +47,7 @@ public class Tile : MonoBehaviour
     {
         if (set)
         {
-            if (OccupyingPiece != null || (forPiece is Pawn pawn && pawn.EnPassantTiles.ContainsKey(this)))
+            if (OccupyingPiece != null || (forPiece is Pawn pawn && pawn.EnPassantTiles.Contains(this)))
             {
                 SetCaptureIndicator(set, forPiece);
             }

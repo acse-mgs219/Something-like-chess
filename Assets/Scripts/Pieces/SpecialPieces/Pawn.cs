@@ -7,8 +7,7 @@ using UnityEssentials.Extensions;
 
 public class Pawn : Chesspiece
 {
-    private Dictionary<Tile, Pawn> _enPassantTiles = new Dictionary<Tile, Pawn>();
-    public Dictionary<Tile, Pawn> EnPassantTiles => _enPassantTiles;
+    public List<Tile> EnPassantTiles => _legalMoves.Where(m => m.EnPassant).Select(m => m.ToTile).ToList();
 
     public override void Init(Player player, Tile tile)
     {
@@ -21,13 +20,11 @@ public class Pawn : Chesspiece
     public override void CalculateLegalMoves(Tile[,] grid)
     {
         base.CalculateLegalMoves(grid);
-        FillEnPassantTiles(grid);
-        _legalMoves.AddRange(_enPassantTiles.Keys);
+        FillEnPassantMoves(grid);
     }
 
-    public void FillEnPassantTiles(Tile[,] grid)
+    public void FillEnPassantMoves(Tile[,] grid)
     {
-        _enPassantTiles = new Dictionary<Tile, Pawn>();
         int currentY = _tile.Y;
 
         if (currentY <= 1 || currentY >= GridManager.instance.Height - 2)
@@ -64,18 +61,12 @@ public class Pawn : Chesspiece
                 continue;
             }
 
-            int lastY = (int) historyTiles[historyTiles.Count - 2].Y;
+            int lastY = historyTiles[historyTiles.Count - 2].Y;
 
             if (Math.Abs(currentY - lastY) == 2 && PlayerManager.instance.HasPlayer2MovedSincePlayer1Turn(pawn.Player, _player, pawn.History.MoveTurns[historyTiles.Count - 1]) == false)
             {
-                _enPassantTiles[GridManager.instance.GetTileAtPosition(pawn._tile.X, (currentY + lastY) / 2)] = pawn;
+                _legalMoves.Add(new Move(GridManager.instance.GetTileAtPosition(pawn._tile.X, (currentY + lastY) / 2), _tile, pawn, enPassant: true));
             }
         }
-    }
-
-    public override void PlaceCopyOnPredicitonBoard()
-    {
-        base.PlaceCopyOnPredicitonBoard();
-        (_predictionCopy as Pawn)._enPassantTiles = _enPassantTiles;
     }
 }

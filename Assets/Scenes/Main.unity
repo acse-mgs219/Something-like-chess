@@ -370,6 +370,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   winnerText: {fileID: 1344677934}
   winnerBackground: {fileID: 2040167831}
+  checkMarker: {fileID: 1694868450}
 --- !u!1 &1344677932
 GameObject:
   m_ObjectHideFlags: 0
@@ -732,12 +733,12 @@ GameObject:
   - component: {fileID: 1694868453}
   - component: {fileID: 1694868452}
   m_Layer: 5
-  m_Name: Image
+  m_Name: CheckMarker
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1694868451
 RectTransform:
   m_ObjectHideFlags: 0
@@ -859,7 +860,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &2040167832
 RectTransform:
   m_ObjectHideFlags: 0

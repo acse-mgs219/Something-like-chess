@@ -70,6 +70,18 @@ public class GridManager : MonoBehaviour
         }
     }
 
+    public Tile ConvertRealTileToPrediction(Tile tile, bool reverse = false)
+    {
+        if (reverse)
+        {
+            return _board[tile.X, tile.Y];
+        }
+        else
+        {
+            return _predictionBoard[tile.X, tile.Y];
+        }
+    }
+
     public void ReadPieces(bool real = true)
     {
         string piecesLocation = real ? @"Assets\Database\board.csv" : @"Assets\Database\prediction_board.csv";
