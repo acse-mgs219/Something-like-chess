@@ -35,7 +35,7 @@ public class Player : MonoBehaviour
                 Tile[,] grid = GridManager.instance.PredictionBoard;
 
                 Tile predictionTargetTile = grid[tile.X, tile.Y];
-                piece.PredictionCopy.MoveTo(predictionTargetTile, prediction: true);
+                piece.PredictionCopy.MoveTo(predictionTargetTile);
 
                 bool dangerousMove = PlayerManager.instance.CalculateChecksAgainstPlayer(this);
 
@@ -51,6 +51,7 @@ public class Player : MonoBehaviour
 
     public void StartTurn()
     {
+        UIManager.instance.ShowCheck(this, IsInCheck);
         TrimChecks();
 
         if (_isHuman == false)

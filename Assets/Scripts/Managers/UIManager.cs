@@ -15,6 +15,7 @@ public class UIManager : MonoBehaviour
 
     public TextMeshProUGUI winnerText;
     public GameObject winnerBackground;
+    public GameObject checkMarker;
 
     private void Awake()
     {
@@ -29,5 +30,18 @@ public class UIManager : MonoBehaviour
         winnerText.text = $"The winner is {player.Name}";
 
         winnerBackground.SetActive(true);
+    }
+
+    public void ShowCheck(Player player, bool inCheck)
+    {
+
+        if (inCheck)
+        {
+            Color playerColor = ColorHelper.Instance.GetColor(player.Color);
+            Image background = checkMarker.GetComponent<Image>();
+            background.color = new Color(playerColor.r, playerColor.g, playerColor.b, background.color.a);
+        }
+
+        checkMarker.SetActive(inCheck);
     }
 }
