@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 [Serializable]
@@ -83,6 +84,27 @@ public class Tile : MonoBehaviour
             SpriteRenderer moveIndicatorRenderer = _moveIndicator.GetComponent<SpriteRenderer>();
             moveIndicatorRenderer.color = new Color(forPiece.Color.r, forPiece.Color.g, forPiece.Color.b, moveIndicatorRenderer.color.a);
         }
+    }
+
+    public bool IsTileSafeForPlayer(Player player)
+    {
+        foreach (Player otherPlayer in PlayerManager.instance.Players.Where(p => p != player))
+        {
+            if (otherPlayer.Pieces != null)
+            foreach (Chesspiece piece in otherPlayer.Pieces)
+            {
+                if (piece.LegalMoves != null)
+                foreach (Move move in piece.LegalMoves)
+                {
+                    if (move.ToTile == this)
+                    {
+                        return false;
+                    }
+                }
+            }
+        }
+
+        return true;
     }
 
     private void OnMouseDown()

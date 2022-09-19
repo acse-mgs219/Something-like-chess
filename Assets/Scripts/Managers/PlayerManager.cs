@@ -40,7 +40,7 @@ public class PlayerManager : MonoBehaviour
 
     public void StartPlayerTurn()
     {
-        PlayerManager.instance.CalculateAllPiecesLegalMoves();
+        CalculateAllPiecesLegalMoves();
         CurrentActivePlayer.StartTurn();
     }
 

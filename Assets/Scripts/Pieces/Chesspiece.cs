@@ -27,9 +27,9 @@ public abstract class Chesspiece : MonoBehaviour
     public Color Color => ColorHelper.Instance.GetColor(_player.Color);
 
     protected List<Func<Tile[,], Tile, Player, List<Move>>> _movementSets;
-    public bool HasMoved => History.Moves > 0;
 
     public PieceHistory History;
+    public bool HasMoved => History.Moves > 0;
     protected Chesspiece _predictionCopy;
     public Chesspiece PredictionCopy => _predictionCopy;
     private bool _isPredictionCopy = false;
@@ -44,13 +44,13 @@ public abstract class Chesspiece : MonoBehaviour
     // #TODO: Surely there is a way to give constructor arguments in Unity
     public virtual void Init(Player player, Tile tile)
     {
+        History = new PieceHistory(tile);
         _movementSets = new List<Func<Tile[,], Tile, Player, List<Move>>>();
         _player = player;
         _player.Pieces.Add(this);
 
         PlaceAt(tile);
         _renderer.color = Color;
-        History = new PieceHistory(tile);
     }
 
     public virtual void PlaceCopyOnPredicitonBoard()
@@ -64,6 +64,7 @@ public abstract class Chesspiece : MonoBehaviour
             instancePiece._player = _player;
             instancePiece._vip = _vip;
             instancePiece._isPredictionCopy = true;
+            instancePiece.History = History;
             Tile tileForCopy = GridManager.instance.PredictionBoard[_tile.X, _tile.Y];
             instancePiece.PlaceAt(tileForCopy);
             _predictionCopy = instancePiece;
@@ -138,6 +139,21 @@ public abstract class Chesspiece : MonoBehaviour
         _tile = GridManager.instance.ConvertRealTileToPrediction(move.ToTile);
         _tile.OccupyingPiece = this;
         transform.position = new Vector3(_tile.X, _tile.Y, transform.position.z);
+
+        //if (move.Castle)
+        //{
+        //    if (move.TargetPiece != null)
+        //    {
+        //        int destinationX = (move.ToTile.X + move.FromTile.X) / 2;
+        //        Tile targetTile = GridManager.instance.Board[destinationX, move.ToTile.Y];
+        //        Move rookPartOfCastle = new Move(targetTile, move.TargetPiece._tile, castle: true);
+        //        move.TargetPiece.PredictionMove(rookPartOfCastle);
+        //    }
+        //    else
+        //    {
+        //        return;
+        //    }
+        //}
     }
 
     private void RealMove(Move move)
@@ -148,13 +164,27 @@ public abstract class Chesspiece : MonoBehaviour
         _tile.OccupyingPiece = null;
             
         _tile = move.ToTile;
+        _tile.OccupyingPiece = this;
+        transform.position = new Vector3(_tile.X, _tile.Y, transform.position.z);
 
         if (move.Castle == false && move.TargetPiece != null)
         {
             move.TargetPiece.Destroy();
         }
-        _tile.OccupyingPiece = this;
-        transform.position = new Vector3(_tile.X, _tile.Y, transform.position.z);
+        else if (move.Castle)
+        {
+            if (move.TargetPiece != null)
+            {
+                int destinationX = (move.ToTile.X + move.FromTile.X) / 2;
+                Tile targetTile = GridManager.instance.Board[destinationX, move.ToTile.Y];
+                Move rookPartOfCastle = new Move(targetTile, move.TargetPiece._tile, castle: true);
+                move.TargetPiece.RealMove(rookPartOfCastle);
+            }
+            else
+            {
+                return;
+            }
+        }
 
         // Game ends in draw if 50 turns go by without a pawn move.
         if (this is Pawn)
