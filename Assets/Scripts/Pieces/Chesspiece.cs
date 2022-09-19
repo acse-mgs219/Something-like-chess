@@ -31,6 +31,8 @@ public abstract class Chesspiece : MonoBehaviour
     public PieceHistory History;
     protected Chesspiece _predictionCopy;
     public Chesspiece PredictionCopy => _predictionCopy;
+    private bool _isPredictionCopy = false;
+    public bool IsPredictionCopy => _isPredictionCopy;
 
     public virtual void CalculateLegalMoves(Tile[,] grid)
     {
@@ -60,14 +62,15 @@ public abstract class Chesspiece : MonoBehaviour
             instancePiece._movementSets = _movementSets;
             instancePiece._player = _player;
             instancePiece._vip = _vip;
+            instancePiece._isPredictionCopy = true;
             Tile tileForCopy = GridManager.instance.PredictionBoard[_tile.X, _tile.Y];
-            instancePiece.CopyTo(tileForCopy);
+            instancePiece.PlaceAt(tileForCopy);
             _predictionCopy = instancePiece;
         }
         else
         {
             Tile tileForCopy = GridManager.instance.PredictionBoard[_tile.X, _tile.Y];
-            _predictionCopy.CopyTo(tileForCopy);
+            _predictionCopy.PlaceAt(tileForCopy);
         }
     }
 
@@ -93,48 +96,75 @@ public abstract class Chesspiece : MonoBehaviour
         Destroy(gameObject);
     }
 
-    public void CopyTo(Tile tile)
+    public void PlaceAt(Tile tile)
     {
         if (_tile?.OccupyingPiece != null) _tile.OccupyingPiece = null;
 
         _tile = tile;
         _tile.OccupyingPiece = this;
-        transform.position = new Vector3(_tile.X, _tile.Y, 15f);
+        transform.position = new Vector3(_tile.X, _tile.Y, _isPredictionCopy ? 15f : -1f);
     }
 
-    public void PlaceAt(Tile tile)
+    public void MoveTo(Tile tile)
     {
+        if (_isPredictionCopy)
+        {
+            PredictionMoveTo(tile);
+        }
+        else
+        {
+            RealMoveTo(tile);
+        }
+    }
+
+    private void PredictionMoveTo(Tile tile)
+    {
+        _tile.OccupyingPiece = null;
+
         _tile = tile;
         _tile.OccupyingPiece = this;
-        transform.position = new Vector3(_tile.X, _tile.Y, -1f);
+        transform.position = new Vector3(_tile.X, _tile.Y, transform.position.z);
+
+        // Game ends in draw if 50 turns go by without a pawn move.
+        if (this is Pawn pawn)
+        {
+            if (pawn.EnPassantTiles.TryGetValue(tile, out Pawn passedPawn))
+            {
+                passedPawn.Destroy();
+            }
+        }
     }
 
-    public void MoveTo(Tile tile, bool prediction = false)
+    private void RealMoveTo(Tile tile)
     {
-        if (prediction || _legalMoves.Contains(tile))
+        if (_legalMoves.Contains(tile))
         {
-            if (!prediction) History.RecordMove(tile);
+            History.RecordMove(tile);
 
             _tile.OccupyingPiece = null;
+            
             _tile = tile;
-            if (!prediction) _tile.OccupyingPiece?.Destroy();
+            _tile.OccupyingPiece?.Destroy();
             _tile.OccupyingPiece = this;
             transform.position = new Vector3(_tile.X, _tile.Y, transform.position.z);
 
             // Game ends in draw if 50 turns go by without a pawn move.
             if (this is Pawn pawn)
             {
-                if (!prediction) GameManager.instance.TurnLimit = GameManager.instance.CurrentTurn + 50;
+                GameManager.instance.TurnLimit = GameManager.instance.CurrentTurn + 50;
                 if (pawn.EnPassantTiles.TryGetValue(tile, out Pawn passedPawn))
                 {
                     passedPawn.Destroy();
                 }
             }
 
-            if (!prediction) PlayerManager.instance.OnPlayerEndTurn();
+            PieceManager.instance.SetSelectedPiece(null);
+            PlayerManager.instance.OnPlayerEndTurn();
         }
-
-        if (!prediction) PieceManager.instance.SetSelectedPiece(null);
+        else
+        {
+            PieceManager.instance.SetSelectedPiece(null);
+        }
     }
 }
 

@@ -78,11 +78,6 @@ public class PlayerManager : MonoBehaviour
             List<Chesspiece> predictionPieces = otherPlayer.Pieces.Select(p => p.PredictionCopy).ToList();
             List<Chesspiece> troublesomePieces = predictionPieces.Where(p => p.Tile == null).ToList();
 
-            if (troublesomePieces.Count > 0)
-            {
-                Debugger.Log(0, "adawefa", "Troublesome piece detected");
-            }
-
             foreach (Chesspiece piece in predictionPieces)
             {
                 piece.CalculateLegalMoves(GridManager.instance.PredictionBoard);
