@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 9109487828381407187}
   - component: {fileID: 175546780976013298}
   - component: {fileID: -8934166434105956571}
+  - component: {fileID: 8957649902109035479}
   m_Layer: 0
   m_Name: Bishop
   m_TagString: Untagged
@@ -99,7 +100,7 @@ MonoBehaviour:
   _renderer: {fileID: 9109487828381407187}
   Type: 0
   _vip: 0
-  PromotingPawn: {fileID: 0}
+  IsPromotionDummy: 0
 --- !u!61 &-8934166434105956571
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -126,3 +127,24 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 2.56, y: 2.56}
   m_EdgeRadius: 0
+--- !u!50 &8957649902109035479
+Rigidbody2D:
+  serializedVersion: 4
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9109487828381407189}
+  m_BodyType: 0
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDrag: 0
+  m_AngularDrag: 0.05
+  m_GravityScale: 0
+  m_Material: {fileID: 0}
+  m_Interpolate: 0
+  m_SleepingMode: 1
+  m_CollisionDetection: 0
+  m_Constraints: 0

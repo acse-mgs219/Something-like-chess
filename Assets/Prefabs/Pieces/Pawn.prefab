@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 4707476878590975483}
   - component: {fileID: -1135234985722876483}
   - component: {fileID: -4294403825501040205}
+  - component: {fileID: -2093712017836953849}
   m_Layer: 0
   m_Name: Pawn
   m_TagString: Untagged
@@ -99,7 +100,7 @@ MonoBehaviour:
   _renderer: {fileID: 4707476878590975483}
   Type: 0
   _vip: 0
-  PromotingPawn: {fileID: 0}
+  IsPromotionDummy: 0
   PromotableTypes: 00000000010000000200000004000000
 --- !u!61 &-4294403825501040205
 BoxCollider2D:
@@ -127,3 +128,24 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 2.56, y: 2.56}
   m_EdgeRadius: 0
+--- !u!50 &-2093712017836953849
+Rigidbody2D:
+  serializedVersion: 4
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6305996875330201264}
+  m_BodyType: 0
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDrag: 0
+  m_AngularDrag: 0.05
+  m_GravityScale: 0
+  m_Material: {fileID: 0}
+  m_Interpolate: 0
+  m_SleepingMode: 1
+  m_CollisionDetection: 0
+  m_Constraints: 0

@@ -21,6 +21,8 @@ public class Move
     private bool _promotion;
     public bool Promotion => _promotion;
 
+    public Vector3 Translation => new Vector3(ToTile.X - _fromTile.X, ToTile.Y - _fromTile.Y, 0);
+
     public Move(Tile toTile, Tile fromTile, Chesspiece targetPiece = null, bool enPassant = false, bool castle = false, bool promotion = false)
     {
         ToTile = toTile;

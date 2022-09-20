@@ -44,8 +44,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _name: White
-  _isHuman: 1
-  _color: 745
+  _isHuman: 0
+  _color: 928
   PromotionDummies: []
   _pawnMovementDirection: 1
   IsInCheck: 0

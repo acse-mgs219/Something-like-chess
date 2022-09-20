@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 7371527658033451928}
   - component: {fileID: -8770600323231047417}
   - component: {fileID: 1888315072209911814}
+  - component: {fileID: -3762478937734544642}
   m_Layer: 0
   m_Name: King
   m_TagString: Untagged
@@ -99,7 +100,7 @@ MonoBehaviour:
   _renderer: {fileID: 7371527658033451928}
   Type: 0
   _vip: 1
-  PromotingPawn: {fileID: 0}
+  IsPromotionDummy: 0
 --- !u!61 &1888315072209911814
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -126,3 +127,24 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 2.56, y: 2.56}
   m_EdgeRadius: 0
+--- !u!50 &-3762478937734544642
+Rigidbody2D:
+  serializedVersion: 4
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3515102293571059848}
+  m_BodyType: 0
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDrag: 0
+  m_AngularDrag: 0.05
+  m_GravityScale: 0
+  m_Material: {fileID: 0}
+  m_Interpolate: 0
+  m_SleepingMode: 1
+  m_CollisionDetection: 0
+  m_Constraints: 0

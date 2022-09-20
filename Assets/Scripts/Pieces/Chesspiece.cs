@@ -42,6 +42,8 @@ public abstract class Chesspiece : MonoBehaviour
     public Pawn PromotingPawn => _promotingPawn;
     public bool IsPromotionDummy = false;
 
+    private Rigidbody2D _body;
+
     public virtual void CalculateLegalMoves(Tile[,] grid)
     {
         _legalMoves = TypesOfMovement.GetLegalMovesForMovementSets(grid, _tile, _player, _movementSets);
@@ -55,6 +57,7 @@ public abstract class Chesspiece : MonoBehaviour
         _movementSets = new List<Func<Tile[,], Tile, Player, List<Move>>>();
         _player = player;
         _player.Pieces.Add(this);
+        _body = GetComponent<Rigidbody2D>();
 
         PlaceAt(tile);
         _renderer.color = Color;
@@ -186,6 +189,18 @@ public abstract class Chesspiece : MonoBehaviour
         }
     }
 
+    private void Update()
+    {
+        if (!IsPredictionCopy && _body.velocity != Vector2.zero)
+        {
+            if (transform.position.x.ApproximatelyEquals(_tile.X, 0.1f) && transform.position.y.ApproximatelyEquals(_tile.Y, 0.1f))
+            {
+                transform.position = new Vector3(_tile.X, _tile.Y, transform.position.z);
+                _body.velocity = Vector2.zero;
+            }
+        }
+    }
+
     protected virtual void RealMove(Move move)
     {
 
@@ -195,7 +210,7 @@ public abstract class Chesspiece : MonoBehaviour
             
         _tile = move.ToTile;
         _tile.OccupyingPiece = this;
-        transform.position = new Vector3(_tile.X, _tile.Y, transform.position.z);
+        _body.velocity = new Vector2(move.Translation.x / (Time.deltaTime * 100), move.Translation.y / (Time.deltaTime * 100));
 
         if (move.Castle == false && move.TargetPiece != null)
         {
