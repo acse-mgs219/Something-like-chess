@@ -38,6 +38,10 @@ public abstract class Chesspiece : MonoBehaviour
     private bool _isPredictionCopy = false;
     public bool IsPredictionCopy => _isPredictionCopy;
 
+    private Pawn _promotingPawn = null;
+    public Pawn PromotingPawn => _promotingPawn;
+    public bool IsPromotionDummy = false;
+
     public virtual void CalculateLegalMoves(Tile[,] grid)
     {
         _legalMoves = TypesOfMovement.GetLegalMovesForMovementSets(grid, _tile, _player, _movementSets);
@@ -54,6 +58,14 @@ public abstract class Chesspiece : MonoBehaviour
 
         PlaceAt(tile);
         _renderer.color = Color;
+    }
+
+    public virtual void InitPromotionDummy(Pawn promotingPawn)
+    {
+        _promotingPawn = promotingPawn;
+        IsPromotionDummy = true;
+        BoxCollider2D collider = GetComponent<BoxCollider2D>();
+        collider.enabled = true;
     }
 
     public virtual void PlaceCopyOnPredicitonBoard()
@@ -173,7 +185,7 @@ public abstract class Chesspiece : MonoBehaviour
         }
     }
 
-    private void RealMove(Move move)
+    protected virtual void RealMove(Move move)
     {
 
         History.RecordMove(move);
@@ -204,13 +216,38 @@ public abstract class Chesspiece : MonoBehaviour
         }
 
         // Game ends in draw if 50 turns go by without a pawn move.
-        if (this is Pawn)
+        if (this is Pawn pawn)
         {
             GameManager.instance.TurnLimit = GameManager.instance.CurrentTurn + 50;
+
+            // Test promotion.
+            if (move.Promotion)
+            {
+                int x = _tile.X;
+                foreach (PieceType promotionType in pawn.PromotableTypes)
+                {
+                    ScriptablePiece Piece = PieceManager.instance.GetPieceOfType(promotionType);
+                    Chesspiece instancePiece = Instantiate(Piece.Piece);
+                    instancePiece.transform.position = new Vector3(x++, _tile.Y + _player.PawnMovementDirection, -1f);
+                    instancePiece.Type = promotionType;
+                    instancePiece.InitPromotionDummy(pawn);
+                    _player.PromotionDummies.Add(instancePiece);
+                }
+            }
         }
 
         PieceManager.instance.SetSelectedPiece(null);
-        PlayerManager.instance.OnPlayerEndTurn();
+        if (!move.Promotion) PlayerManager.instance.OnPlayerEndTurn();
+    }
+
+    private void OnMouseDown()
+    {
+        if (IsPromotionDummy == false)
+        {
+            return;
+        }
+
+        PromotingPawn.Promote(Type);
     }
 }
 

@@ -18,12 +18,16 @@ public class Move
     private bool _castle;
     public bool Castle => _castle;
 
-    public Move(Tile toTile, Tile fromTile, Chesspiece targetPiece = null, bool enPassant = false, bool castle = false)
+    private bool _promotion;
+    public bool Promotion => _promotion;
+
+    public Move(Tile toTile, Tile fromTile, Chesspiece targetPiece = null, bool enPassant = false, bool castle = false, bool promotion = false)
     {
         ToTile = toTile;
         _fromTile = fromTile;
         _targetPiece = targetPiece;
         _enPassant = enPassant;
         _castle = castle;
+        _promotion = promotion;
     }
 }

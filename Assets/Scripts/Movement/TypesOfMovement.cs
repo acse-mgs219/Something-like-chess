@@ -13,7 +13,7 @@ public static class TypesOfMovement
         return original;
     }
 
-    public static List<Move> MoveInDirection(Tile[,] grid, Tile tile, Player player, int xMove, int yMove, int maxMoves = -1, bool xMirror = false, bool yMirror = false, bool canCapture = true, bool mustCapture = false, bool stopAtCapture = true)
+    public static List<Move> MoveInDirection(Tile[,] grid, Tile tile, Player player, int xMove, int yMove, int maxMoves = -1, bool xMirror = false, bool yMirror = false, bool canCapture = true, bool mustCapture = false, bool stopAtCapture = true, bool canPromote = false)
     {
         int x = tile.X;
         int y = tile.Y;
@@ -24,13 +24,14 @@ public static class TypesOfMovement
         int movesMade = 0;
         while (endCondition(DoMove(ref x, xMove), DoMove(ref y, yMove)) == false && movesMade++ != maxMoves)
         {
+            bool isPromotion = (y == 0 || y == GridManager.instance.Height - 1) && canPromote;
             Tile targetTile = grid[x, y];
             Chesspiece piece = targetTile.OccupyingPiece;
             if (piece is null)
             {
                 if (mustCapture == false)
                 {
-                    legalMoves.Add(new Move(targetTile, tile));
+                    legalMoves.Add(new Move(targetTile, tile, promotion: isPromotion));
                 }
             }
             else
@@ -39,7 +40,7 @@ public static class TypesOfMovement
                 {
                     if (canCapture)
                     {
-                        legalMoves.Add(new Move(targetTile, tile, piece));
+                        legalMoves.Add(new Move(targetTile, tile, piece, promotion: isPromotion));
                         if (piece.VIP == true)
                         {
                             piece.Player.IsInCheck = true;
@@ -50,9 +51,9 @@ public static class TypesOfMovement
             }
         }
 
-        if (xMirror) legalMoves.AddRange(MoveInDirection(grid, tile, player, -xMove, yMove, maxMoves, false, false, canCapture, mustCapture, stopAtCapture));
-        if (yMirror) legalMoves.AddRange(MoveInDirection(grid, tile, player, xMove, -yMove, maxMoves, false, false, canCapture, mustCapture, stopAtCapture));
-        if (xMirror && yMirror) legalMoves.AddRange(MoveInDirection(grid, tile, player, -xMove, -yMove, maxMoves, false, false, canCapture, mustCapture, stopAtCapture));
+        if (xMirror) legalMoves.AddRange(MoveInDirection(grid, tile, player, -xMove, yMove, maxMoves, false, false, canCapture, mustCapture, stopAtCapture, canPromote));
+        if (yMirror) legalMoves.AddRange(MoveInDirection(grid, tile, player, xMove, -yMove, maxMoves, false, false, canCapture, mustCapture, stopAtCapture, canPromote));
+        if (xMirror && yMirror) legalMoves.AddRange(MoveInDirection(grid, tile, player, -xMove, -yMove, maxMoves, false, false, canCapture, mustCapture, stopAtCapture, canPromote));
 
         return legalMoves;
     }

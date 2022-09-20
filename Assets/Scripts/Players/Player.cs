@@ -19,10 +19,13 @@ public class Player : MonoBehaviour
     private List<Chesspiece> _pieces = new List<Chesspiece>();
     public List<Chesspiece> Pieces => _pieces;
 
+    public List<Chesspiece> PromotionDummies = new List<Chesspiece>();
+
     [SerializeField] int _pawnMovementDirection = -1;
     public int PawnMovementDirection => _pawnMovementDirection;
 
     public bool IsInCheck = false;
+
 
     public void TrimChecks()
     {

@@ -8,19 +8,15 @@ using UnityEssentials.Extensions;
 
 public class Pawn : Chesspiece
 {
+    public List<PieceType> PromotableTypes;
     public List<Tile> EnPassantTiles => _legalMoves.Where(m => m.EnPassant).Select(m => m.ToTile).ToList();
 
     public override void Init(Player player, Tile tile)
     {
-        if (tile == null)
-        {
-            UnityEngine.Debug.Log("Easier logging");
-            Debugger.Log(0, "yes", "Swooping is bad");
-        }
         base.Init(player, tile);
 
-        _movementSets.Add((g, t, p) => TypesOfMovement.MoveInDirection(g, t, p, 0, _player.PawnMovementDirection, maxMoves: HasMoved ? 1 : 2, canCapture: false));
-        _movementSets.Add((g, t, p) => TypesOfMovement.MoveInDirection(g, t, p, 1, _player.PawnMovementDirection, maxMoves: 1, xMirror: true, mustCapture: true));
+        _movementSets.Add((g, t, p) => TypesOfMovement.MoveInDirection(g, t, p, 0, _player.PawnMovementDirection, maxMoves: HasMoved ? 1 : 2, canCapture: false, canPromote: true));
+        _movementSets.Add((g, t, p) => TypesOfMovement.MoveInDirection(g, t, p, 1, _player.PawnMovementDirection, maxMoves: 1, xMirror: true, mustCapture: true, canPromote: true));
     }
 
     public override void CalculateLegalMoves(Tile[,] grid)
@@ -74,5 +70,17 @@ public class Pawn : Chesspiece
                 _legalMoves.Add(new Move(GridManager.instance.GetTileAtPosition(pawn._tile.X, (currentY + lastY) / 2), _tile, pawn, enPassant: true));
             }
         }
+    }
+
+    public void Promote(PieceType type)
+    {
+        ScriptablePiece Piece = PieceManager.instance.GetPieceOfType(type);
+        Chesspiece instancePiece = Instantiate(Piece.Piece);
+        instancePiece.Init(_player, _tile);
+
+        _player.PromotionDummies.ForEach(d => Destroy(d.gameObject));
+        _player.PromotionDummies.Clear();
+        Destroy();
+        PlayerManager.instance.OnPlayerEndTurn();
     }
 }
