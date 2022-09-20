@@ -103,6 +103,7 @@ public abstract class Chesspiece : MonoBehaviour
 
         if (VIP && IsPredictionCopy == false)
         {
+            UnityEngine.Debug.LogAssertion("King was captured, this shouldn't have been possible?");
             _player.Pieces.ForEach(p => Destroy(p));
             Destroy(_player.gameObject);
             GameManager.instance.ChangeState(GameState.EndGame);
@@ -218,7 +219,7 @@ public abstract class Chesspiece : MonoBehaviour
         // Game ends in draw if 50 turns go by without a pawn move.
         if (this is Pawn pawn)
         {
-            GameManager.instance.TurnLimit = GameManager.instance.CurrentTurn + 50;
+            GameManager.instance.RemainingTurns = GameManager.instance.CurrentTurn + GameManager.instance.TurnLimit;
 
             // Test promotion.
             if (move.Promotion)

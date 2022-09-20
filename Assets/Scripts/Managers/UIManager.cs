@@ -22,13 +22,27 @@ public class UIManager : MonoBehaviour
         instance = this;
     }
 
-    public void AnnounceWinner(Player player)
+    public void AnnounceWinner()
     {
-        Color playerColor = ColorHelper.Instance.GetColor(player.Color);
         Image background = winnerBackground.GetComponent<Image>();
-        background.color = new Color(playerColor.r, playerColor.g, playerColor.b, background.color.a);
-        winnerText.text = $"The winner is {player.Name}";
+        Color backgroundColor = Color.black;
+        List<Player> survivingPlayers = PlayerManager.instance.Players.Where(p => p.IsInCheck == false).ToList();
 
+        if (survivingPlayers.Count == 1)
+        {
+            Player winner = survivingPlayers.First();
+
+            backgroundColor = ColorHelper.Instance.GetColor(winner.Color);
+            winnerText.text = $"The winner is {winner.Name}";
+        }
+        else
+        {
+            List<Color> colors = survivingPlayers.Select(p => ColorHelper.Instance.GetColor(p.Color)).ToList();
+            backgroundColor = colors.Average();
+            winnerText.text = "The game ends in a tie!";
+        }
+
+        background.color = new Color(backgroundColor.r, backgroundColor.g, backgroundColor.b, background.color.a);
         winnerBackground.SetActive(true);
     }
 

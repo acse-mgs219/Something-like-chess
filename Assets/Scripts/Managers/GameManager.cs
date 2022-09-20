@@ -8,6 +8,7 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager instance;
     public int TurnLimit;
+    public int RemainingTurns;
     public int CurrentTurn;
 
     public GameState GameState;
@@ -19,6 +20,7 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
+        RemainingTurns = TurnLimit;
         ChangeState(GameState.GenerateGrid);
     }
 
@@ -37,13 +39,17 @@ public class GameManager : MonoBehaviour
                 GridManager.instance.Init();
                 break;
             case GameState.MakeMoves:
-                if (CurrentTurn < TurnLimit)
+                if (RemainingTurns > 0)
                 {
                     PlayerManager.instance.StartPlayerTurn();
                 }
+                else
+                {
+                    ChangeState(GameState.EndGame);
+                }
                 break;
             case GameState.EndGame:
-                UIManager.instance.AnnounceWinner(PlayerManager.instance.Players.First());
+                UIManager.instance.AnnounceWinner();
                 break;
         }
     }

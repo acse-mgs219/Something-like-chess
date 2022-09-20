@@ -632,6 +632,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   TurnLimit: 50
+  RemainingTurns: 0
   CurrentTurn: 0
   GameState: 0
 --- !u!1 &1545123123

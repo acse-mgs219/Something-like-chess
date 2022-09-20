@@ -56,9 +56,16 @@ public class Player : MonoBehaviour
         UIManager.instance.ShowCheck(this, IsInCheck);
         TrimChecks();
 
-        if (_isHuman == false)
+        if (_pieces.All(p => p.LegalMoves.Count == 0))
         {
-            StartCoroutine(PlayRandomMove());
+            GameManager.instance.ChangeState(GameState.EndGame);
+        }
+        else
+        {
+            if (_isHuman == false)
+            {
+                StartCoroutine(PlayRandomMove());
+            }
         }
     }
 

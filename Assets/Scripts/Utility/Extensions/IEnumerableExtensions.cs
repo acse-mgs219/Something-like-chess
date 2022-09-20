@@ -29,4 +29,24 @@ public static class IEnumerableExtensions
     {
         return sequence.OrderBy(_ => UnityEngine.Random.value).First();
     }
+
+    public static Color Average(this IEnumerable<Color> source)
+    {
+        float reds = 0;
+        float greens = 0;
+        float blues = 0;
+        float alphas = 0;
+        float cols = 0;
+
+        foreach (Color color in source)
+        {
+            reds += color.r;
+            greens += color.g;
+            blues += color.b;
+            alphas += color.a;
+            cols++;
+        }
+
+        return new Color(reds / cols, greens / cols, blues / cols, alphas / cols);
+    }
 }

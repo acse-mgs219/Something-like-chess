@@ -52,7 +52,7 @@ public class PlayerManager : MonoBehaviour
         if (CurrentActivePlayerIndex >= Players.Count)
         {
             CurrentActivePlayerIndex = 0;
-            GameManager.instance.CurrentTurn++;
+            GameManager.instance.RemainingTurns--;
         }
 
         GameManager.instance.ChangeState(GameState.MakeMoves);
@@ -77,8 +77,8 @@ public class PlayerManager : MonoBehaviour
 
     public bool CalculateChecksAgainstPlayer(Player player)
     {
-        player.IsInCheck = false;
         bool wasInCheck = player.IsInCheck;
+        player.IsInCheck = false;
         foreach (Player otherPlayer in Players.Where(p => p != player))
         {
             List<Chesspiece> predictionPieces = otherPlayer.Pieces.Select(p => p.PredictionCopy).Where(p => p != null).ToList();
