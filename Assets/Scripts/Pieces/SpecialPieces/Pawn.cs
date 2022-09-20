@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using UnityEngine;
 using UnityEssentials.Extensions;
@@ -11,6 +12,11 @@ public class Pawn : Chesspiece
 
     public override void Init(Player player, Tile tile)
     {
+        if (tile == null)
+        {
+            UnityEngine.Debug.Log("Easier logging");
+            Debugger.Log(0, "yes", "Swooping is bad");
+        }
         base.Init(player, tile);
 
         _movementSets.Add((g, t, p) => TypesOfMovement.MoveInDirection(g, t, p, 0, _player.PawnMovementDirection, maxMoves: HasMoved ? 1 : 2, canCapture: false));

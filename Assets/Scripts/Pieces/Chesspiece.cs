@@ -30,6 +30,9 @@ public abstract class Chesspiece : MonoBehaviour
 
     public PieceHistory History;
     public bool HasMoved => History.Moves > 0;
+
+    protected Chesspiece _originalPiece;
+    public Chesspiece OriginalPiece => _originalPiece;
     protected Chesspiece _predictionCopy;
     public Chesspiece PredictionCopy => _predictionCopy;
     private bool _isPredictionCopy = false;
@@ -65,6 +68,7 @@ public abstract class Chesspiece : MonoBehaviour
             instancePiece._vip = _vip;
             instancePiece._isPredictionCopy = true;
             instancePiece.History = History;
+            instancePiece._originalPiece = this;
             Tile tileForCopy = GridManager.instance.PredictionBoard[_tile.X, _tile.Y];
             instancePiece.PlaceAt(tileForCopy);
             _predictionCopy = instancePiece;
@@ -76,12 +80,16 @@ public abstract class Chesspiece : MonoBehaviour
         }
     }
 
+    // #TODO: Rework this so destroying pieces just moves them to the side of the board and makes them unmoveable.
     public void Destroy()
     {
-        _tile.OccupyingPiece = null;
+        if (_tile.OccupyingPiece == this)
+        {
+            _tile.OccupyingPiece = null;
+        }
         _tile = null;
 
-        if (VIP)
+        if (VIP && IsPredictionCopy == false)
         {
             _player.Pieces.ForEach(p => Destroy(p));
             Destroy(_player.gameObject);
@@ -90,17 +98,22 @@ public abstract class Chesspiece : MonoBehaviour
 
         if (_predictionCopy != null)
         {
-            _player.Pieces.Remove(this);
             _predictionCopy.Destroy();
         }
 
+        if (_originalPiece != null)
+        {
+            _originalPiece._predictionCopy = null;
+        }
+
+        _player.Pieces.Remove(this);
         _player = null;
         Destroy(gameObject);
     }
 
     public void PlaceAt(Tile tile)
     {
-        if (_tile?.OccupyingPiece != null) _tile.OccupyingPiece = null;
+        if (_tile != null && _tile.OccupyingPiece != null) _tile.OccupyingPiece = null;
 
         _tile = tile;
         _tile.OccupyingPiece = this;
@@ -140,20 +153,24 @@ public abstract class Chesspiece : MonoBehaviour
         _tile.OccupyingPiece = this;
         transform.position = new Vector3(_tile.X, _tile.Y, transform.position.z);
 
-        //if (move.Castle)
-        //{
-        //    if (move.TargetPiece != null)
-        //    {
-        //        int destinationX = (move.ToTile.X + move.FromTile.X) / 2;
-        //        Tile targetTile = GridManager.instance.Board[destinationX, move.ToTile.Y];
-        //        Move rookPartOfCastle = new Move(targetTile, move.TargetPiece._tile, castle: true);
-        //        move.TargetPiece.PredictionMove(rookPartOfCastle);
-        //    }
-        //    else
-        //    {
-        //        return;
-        //    }
-        //}
+        if (move.Castle == false && move.TargetPiece != null && move.TargetPiece.PredictionCopy != null)
+        {
+            move.TargetPiece.PredictionCopy.Destroy();
+        }
+        else if (move.Castle)
+        {
+            if (move.TargetPiece != null && move.TargetPiece.PredictionCopy != null)
+            {
+                int destinationX = (move.ToTile.X + move.FromTile.X) / 2;
+                Tile targetTile = GridManager.instance.Board[destinationX, move.ToTile.Y];
+                Move rookPartOfCastle = new Move(targetTile, move.TargetPiece._tile, castle: true);
+                move.TargetPiece.PredictionCopy.PredictionMove(rookPartOfCastle);
+            }
+            else
+            {
+                return;
+            }
+        }
     }
 
     private void RealMove(Move move)

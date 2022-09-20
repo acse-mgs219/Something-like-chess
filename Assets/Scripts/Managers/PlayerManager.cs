@@ -75,8 +75,7 @@ public class PlayerManager : MonoBehaviour
         bool wasInCheck = player.IsInCheck;
         foreach (Player otherPlayer in Players.Where(p => p != player))
         {
-            List<Chesspiece> predictionPieces = otherPlayer.Pieces.Select(p => p.PredictionCopy).ToList();
-            List<Chesspiece> troublesomePieces = predictionPieces.Where(p => p.Tile == null).ToList();
+            List<Chesspiece> predictionPieces = otherPlayer.Pieces.Select(p => p.PredictionCopy).Where(p => p != null).ToList();
 
             foreach (Chesspiece piece in predictionPieces)
             {
