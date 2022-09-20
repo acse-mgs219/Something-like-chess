@@ -221,18 +221,27 @@ public abstract class Chesspiece : MonoBehaviour
         {
             GameManager.instance.RemainingTurns = GameManager.instance.CurrentTurn + GameManager.instance.TurnLimit;
 
-            // Test promotion.
             if (move.Promotion)
             {
-                int x = _tile.X;
-                foreach (PieceType promotionType in pawn.PromotableTypes)
+                // Human chooses promotion.
+                if (_player.IsHuman)
                 {
-                    ScriptablePiece Piece = PieceManager.instance.GetPieceOfType(promotionType);
-                    Chesspiece instancePiece = Instantiate(Piece.Piece);
-                    instancePiece.transform.position = new Vector3(x++, _tile.Y + _player.PawnMovementDirection, -1f);
-                    instancePiece.Type = promotionType;
-                    instancePiece.InitPromotionDummy(pawn);
-                    _player.PromotionDummies.Add(instancePiece);
+                    int x = _tile.X;
+                    foreach (PieceType promotionType in pawn.PromotableTypes)
+                    {
+                        ScriptablePiece Piece = PieceManager.instance.GetPieceOfType(promotionType);
+                        Chesspiece instancePiece = Instantiate(Piece.Piece);
+                        instancePiece.transform.position = new Vector3(x++, _tile.Y + _player.PawnMovementDirection, -1f);
+                        instancePiece.Type = promotionType;
+                        instancePiece.InitPromotionDummy(pawn);
+                        _player.PromotionDummies.Add(instancePiece);
+                    }
+                }
+                // AI promotes randomly.
+                else
+                {
+                    PieceType promotionType = pawn.PromotableTypes.RandomElement();
+                    pawn.Promote(promotionType);
                 }
             }
         }

@@ -44,7 +44,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _name: Black
-  _isHuman: 1
+  _isHuman: 0
   _color: 892
   PromotionDummies: []
   _pawnMovementDirection: -1
