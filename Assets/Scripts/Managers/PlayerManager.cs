@@ -60,12 +60,18 @@ public class PlayerManager : MonoBehaviour
 
     public void CalculateAllPiecesLegalMoves()
     {
-        foreach (Player player in Players)
+        foreach (Player player in Players.Where(p => p != CurrentActivePlayer))
         {
             foreach (Chesspiece piece in player.Pieces)
             {
                 piece.CalculateLegalMoves(GridManager.instance.Board);
             }
+        }
+
+        // We must calculate the moves of the current active player last, so that they will know if they are in check or can castle.
+        foreach (Chesspiece piece in CurrentActivePlayer.Pieces)
+        {
+            piece.CalculateLegalMoves(GridManager.instance.Board);
         }
     }
 
