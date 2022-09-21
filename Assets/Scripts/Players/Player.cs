@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEssentials.Extensions;
 using static UnityEssentials.Extensions.ColorHelper;
 
 public class Player : MonoBehaviour
@@ -25,6 +26,11 @@ public class Player : MonoBehaviour
     public int PawnMovementDirection => _pawnMovementDirection;
 
     public bool IsInCheck = false;
+
+    public void SetColor(NamedColor color)
+    {
+        _color = color;
+    }
 
     public void SetIsHuman(bool set)
     {

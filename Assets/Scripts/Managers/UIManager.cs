@@ -20,17 +20,13 @@ public class UIManager : MonoBehaviour
 
     [HideInInspector] public List<TextMeshProUGUI> playerLabels;
     [HideInInspector] public List<Toggle> playerHumanToggles;
-    //public TextMeshProUGUI player1Label;
-    //public TextMeshProUGUI player2Label;
-
-    //public Toggle player1IsHuman;
-    //public Toggle player2IsHuman;
+    [HideInInspector] public List<TMP_Dropdown> colorsPickers;
 
     private void Start()
     {
         instance = this;
 
-        playerLabels = startupPanel.GetComponentsInChildren<TextMeshProUGUI>().Where(tmp => tmp.name == "Label").ToList();
+        playerLabels = startupPanel.GetComponentsInChildren<TextMeshProUGUI>().Where(tmp => tmp.name == "NameLabel").ToList();
 
         for (int i = 0; i < playerLabels.Count; i++)
         {
@@ -41,14 +37,42 @@ public class UIManager : MonoBehaviour
 
         playerHumanToggles = startupPanel.GetComponentsInChildren<Toggle>().ToList();
 
-        for (int i = 0; i < playerHumanToggles.Count; i++)
+        foreach (Toggle toggle in playerHumanToggles)
         {
-            Toggle toggle = playerHumanToggles[i];
             toggle.onValueChanged.AddListener((value) =>
             {
                 PlayerManager.instance.SetPlayerHuman(playerHumanToggles.IndexOf(toggle), value);
             });
         }
+
+        List<TMP_Dropdown.OptionData> options = new List<TMP_Dropdown.OptionData>();
+        foreach (string colorName in Enum.GetNames(typeof(ColorHelper.NamedColor)))
+        {
+            options.Add(new TMP_Dropdown.OptionData(colorName));
+        }
+        colorsPickers = startupPanel.GetComponentsInChildren<TMP_Dropdown>().ToList();
+
+        foreach (TMP_Dropdown colorsPicker in colorsPickers)
+        {
+            // Cannot do a "for int i = ..." loop because the delegates all get stuck with the last value of i.
+            int index = colorsPickers.IndexOf(colorsPicker);
+
+            colorsPicker.options = options;
+            colorsPicker.value = (int) PlayerManager.instance.Players[index].Color;
+            colorsPicker.onValueChanged.AddListener((value) =>
+            {
+                OnColorPicked(index, value);
+            });
+        }
+    }
+
+    public void OnColorPicked(int playerIndex, int colorIndex)
+    {
+        ColorHelper.NamedColor namedColor = (ColorHelper.NamedColor) colorIndex;
+        Color color = ColorHelper.Instance.GetColor(namedColor);
+        playerLabels[playerIndex].color = color;
+
+        PlayerManager.instance.SetPlayerColor(playerIndex, namedColor);
     }
 
     public void AnnounceWinner()
