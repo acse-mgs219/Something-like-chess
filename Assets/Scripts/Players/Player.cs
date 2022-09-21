@@ -26,6 +26,10 @@ public class Player : MonoBehaviour
 
     public bool IsInCheck = false;
 
+    public void SetIsHuman(bool set)
+    {
+        _isHuman = set;
+    }
 
     public void TrimChecks()
     {

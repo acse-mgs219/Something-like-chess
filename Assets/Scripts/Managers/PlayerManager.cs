@@ -38,6 +38,11 @@ public class PlayerManager : MonoBehaviour
         StartPlayerTurn();
     }
 
+    public void SetPlayerHuman(int playerIndex, bool human)
+    {
+        _players[playerIndex].SetIsHuman(human);
+    }
+
     public void StartPlayerTurn()
     {
         CalculateAllPiecesLegalMoves();

@@ -21,7 +21,7 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         RemainingTurns = TurnLimit;
-        ChangeState(GameState.GenerateGrid);
+        ChangeState(GameState.PickPlayers);
     }
 
     public void ChangeState(GameState newState)
@@ -35,6 +35,8 @@ public class GameManager : MonoBehaviour
         GameState = newState;
         switch (GameState)
         {
+            case GameState.PickPlayers:
+                break;
             case GameState.GenerateGrid:
                 GridManager.instance.Init();
                 break;
@@ -57,6 +59,7 @@ public class GameManager : MonoBehaviour
 
 public enum GameState
 {
+    PickPlayers,
     GenerateGrid,
     MakeMoves,
     EndGame
