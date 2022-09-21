@@ -1,12 +1,8 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Linq;
 using UnityEngine;
-using UnityEssentials.Extensions;
-using static UnityEditor.Experimental.GraphView.GraphView;
 
 public class PieceManager : MonoBehaviour
 {

@@ -193,7 +193,7 @@ public abstract class Chesspiece : MonoBehaviour
     {
         if (!IsPredictionCopy && _body.velocity != Vector2.zero)
         {
-            if (transform.position.x.ApproximatelyEquals(_tile.X, 0.1f) && transform.position.y.ApproximatelyEquals(_tile.Y, 0.1f))
+            if (transform.position.x.ApproximatelyEquals(_tile.X, 0.3f) && transform.position.y.ApproximatelyEquals(_tile.Y, 0.3f))
             {
                 transform.position = new Vector3(_tile.X, _tile.Y, transform.position.z);
                 _body.velocity = Vector2.zero;
@@ -210,7 +210,11 @@ public abstract class Chesspiece : MonoBehaviour
             
         _tile = move.ToTile;
         _tile.OccupyingPiece = this;
-        _body.velocity = new Vector2(move.Translation.x / (Time.deltaTime * 100), move.Translation.y / (Time.deltaTime * 100));
+
+        _body.velocity = (new Vector2(
+            move.Translation.x,
+            move.Translation.y
+        ).normalized) * 25;
 
         if (move.Castle == false && move.TargetPiece != null)
         {
