@@ -22,6 +22,9 @@ public class Player : MonoBehaviour
 
     public List<Chesspiece> PromotionDummies = new List<Chesspiece>();
 
+    private List<Move> _legalMoves = new List<Move>();
+    public List<Move> LegalMoves => _legalMoves;
+
     [SerializeField] int _pawnMovementDirection = -1;
     public int PawnMovementDirection => _pawnMovementDirection;
 
@@ -39,25 +42,28 @@ public class Player : MonoBehaviour
 
     public void TrimChecks()
     {
-        foreach (Chesspiece piece in _pieces)
+        List<Move> movesToRemove = new List<Move>();
+
+        foreach (Move move in _legalMoves)
         {
-            List<Move> movesToRemove = new List<Move>();
-            foreach (Move move in piece.LegalMoves)
+            GridManager.instance.ResetPredictionBoard();
+            Tile[,] grid = GridManager.instance.PredictionBoard;
+
+            move.PerformMove(prediction: true);
+
+            bool dangerousMove = PlayerManager.instance.CalculateChecksAgainstPlayer(this);
+
+            if (dangerousMove)
             {
-                GridManager.instance.ResetPredictionBoard();
-                Tile[,] grid = GridManager.instance.PredictionBoard;
-
-                piece.PredictionCopy.PerformMove(move);
-
-                bool dangerousMove = PlayerManager.instance.CalculateChecksAgainstPlayer(this);
-
-                if (dangerousMove)
-                {
-                    movesToRemove.Add(move);
-                }
+                movesToRemove.Add(move);
             }
+        }
 
-            piece.LegalMoves.RemoveAll(t => movesToRemove.Contains(t));
+        foreach (Move move in movesToRemove)
+        {
+            Chesspiece movingPiece = move.FromTile.OccupyingPiece;
+            movingPiece.LegalMoves.Remove(move);
+            _legalMoves.Remove(move);
         }
     }
 
@@ -89,9 +95,9 @@ public class Player : MonoBehaviour
                 continue;
             }
 
-            yield return new WaitForSeconds(2);
+            yield return new WaitForSeconds(0.1f);
 
-            pieceToMove.PerformMove(pieceToMove.LegalMoves.RandomElement());
+            pieceToMove.LegalMoves.RandomElement().PerformMove();
             break;
         }
     }

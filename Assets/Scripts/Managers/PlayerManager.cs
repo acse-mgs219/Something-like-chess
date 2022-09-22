@@ -52,6 +52,7 @@ public class PlayerManager : MonoBehaviour
 
     public void StartPlayerTurn()
     {
+        CurrentActivePlayer.LegalMoves.Clear();
         CalculateAllPiecesLegalMoves();
         CurrentActivePlayer.StartTurn();
     }
@@ -64,7 +65,7 @@ public class PlayerManager : MonoBehaviour
         if (CurrentActivePlayerIndex >= Players.Count)
         {
             CurrentActivePlayerIndex = 0;
-            GameManager.instance.RemainingTurns--;
+            GameManager.instance.CurrentTurn++;
         }
 
         GameManager.instance.ChangeState(GameState.MakeMoves);
@@ -77,6 +78,7 @@ public class PlayerManager : MonoBehaviour
             foreach (Chesspiece piece in player.Pieces)
             {
                 piece.CalculateLegalMoves(GridManager.instance.Board);
+                player.LegalMoves.AddRange(piece.LegalMoves);
             }
         }
 
@@ -84,6 +86,7 @@ public class PlayerManager : MonoBehaviour
         foreach (Chesspiece piece in CurrentActivePlayer.Pieces)
         {
             piece.CalculateLegalMoves(GridManager.instance.Board);
+            CurrentActivePlayer.LegalMoves.AddRange(piece.LegalMoves);
         }
     }
 

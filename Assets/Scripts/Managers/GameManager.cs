@@ -7,8 +7,10 @@ using UnityEngine;
 public class GameManager : MonoBehaviour
 {
     public static GameManager instance;
-    public int TurnLimit;
-    public int RemainingTurns;
+    [SerializeField] int _initialTurnLimit;
+    public int InitialTurnLimit => _initialTurnLimit;
+    [InspectorReadOnly] public int TurnLimit;
+    public int RemainingTurns => TurnLimit - CurrentTurn;
     public int CurrentTurn;
 
     public GameState GameState;
@@ -20,7 +22,8 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
-        RemainingTurns = TurnLimit;
+        TurnLimit = _initialTurnLimit;
+        CurrentTurn = 0;
         ChangeState(GameState.PickPlayers);
     }
 

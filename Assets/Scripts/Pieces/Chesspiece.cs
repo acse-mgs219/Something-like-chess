@@ -69,6 +69,7 @@ public abstract class Chesspiece : MonoBehaviour
         IsPromotionDummy = true;
         BoxCollider2D collider = GetComponent<BoxCollider2D>();
         collider.enabled = true;
+        _body = GetComponent<Rigidbody2D>();
     }
 
     public virtual void PlaceCopyOnPredicitonBoard()
@@ -98,6 +99,11 @@ public abstract class Chesspiece : MonoBehaviour
     // #TODO: Rework this so destroying pieces just moves them to the side of the board and makes them unmoveable.
     public void Destroy()
     {
+        if (_predictionCopy != null)
+        {
+            _player.LegalMoves.RemoveAll(m => m.FromTile == _tile);
+        }
+
         if (_tile.OccupyingPiece == this)
         {
             _tile.OccupyingPiece = null;
@@ -127,66 +133,18 @@ public abstract class Chesspiece : MonoBehaviour
         Destroy(gameObject);
     }
 
-    public void PlaceAt(Tile tile)
+    public void PlaceAt(Tile tile, bool move = true)
     {
         if (_tile != null && _tile.OccupyingPiece != null) _tile.OccupyingPiece = null;
 
         _tile = tile;
         _tile.OccupyingPiece = this;
-        transform.position = new Vector3(_tile.X, _tile.Y, _isPredictionCopy ? 15f : -1f);
+        if (move) transform.position = new Vector3(_tile.X, _tile.Y, _isPredictionCopy ? 15f : -1f);
     }
 
-    public void MoveTo(Tile tile)
+    public void SetInMotion(Vector2 motion)
     {
-        Move toMove = _legalMoves.FirstOrDefault(m => m.ToTile == tile);
-        if (toMove != null)
-        {
-            PerformMove(toMove);
-        }
-        else
-        {
-            PieceManager.instance.SetSelectedPiece(null);
-        }
-    }
-
-    public void PerformMove(Move move)
-    {
-        if (_isPredictionCopy)
-        {
-            PredictionMove(move);
-        }
-        else
-        {
-            RealMove(move);
-        }
-    }
-
-    private void PredictionMove(Move move)
-    {
-        _tile.OccupyingPiece = null;
-
-        _tile = GridManager.instance.ConvertRealTileToPrediction(move.ToTile);
-        _tile.OccupyingPiece = this;
-        transform.position = new Vector3(_tile.X, _tile.Y, transform.position.z);
-
-        if (move.Castle == false && move.TargetPiece != null && move.TargetPiece.PredictionCopy != null)
-        {
-            move.TargetPiece.PredictionCopy.Destroy();
-        }
-        else if (move.Castle)
-        {
-            if (move.TargetPiece != null && move.TargetPiece.PredictionCopy != null)
-            {
-                int destinationX = (move.ToTile.X + move.FromTile.X) / 2;
-                Tile targetTile = GridManager.instance.Board[destinationX, move.ToTile.Y];
-                Move rookPartOfCastle = new Move(targetTile, move.TargetPiece._tile, castle: true);
-                move.TargetPiece.PredictionCopy.PredictionMove(rookPartOfCastle);
-            }
-            else
-            {
-                return;
-            }
-        }
+        _body.velocity = motion;
     }
 
     private void Update()
@@ -199,74 +157,6 @@ public abstract class Chesspiece : MonoBehaviour
                 _body.velocity = Vector2.zero;
             }
         }
-    }
-
-    protected virtual void RealMove(Move move)
-    {
-
-        History.RecordMove(move);
-
-        _tile.OccupyingPiece = null;
-            
-        _tile = move.ToTile;
-        _tile.OccupyingPiece = this;
-
-        _body.velocity = (new Vector2(
-            move.Translation.x,
-            move.Translation.y
-        ).normalized) * 25;
-
-        if (move.Castle == false && move.TargetPiece != null)
-        {
-            move.TargetPiece.Destroy();
-        }
-        else if (move.Castle)
-        {
-            if (move.TargetPiece != null)
-            {
-                int destinationX = (move.ToTile.X + move.FromTile.X) / 2;
-                Tile targetTile = GridManager.instance.Board[destinationX, move.ToTile.Y];
-                Move rookPartOfCastle = new Move(targetTile, move.TargetPiece._tile, castle: true);
-                move.TargetPiece.RealMove(rookPartOfCastle);
-            }
-            else
-            {
-                return;
-            }
-        }
-
-        // Game ends in draw if 50 turns go by without a pawn move.
-        if (this is Pawn pawn)
-        {
-            GameManager.instance.RemainingTurns = GameManager.instance.CurrentTurn + GameManager.instance.TurnLimit;
-
-            if (move.Promotion)
-            {
-                // Human chooses promotion.
-                if (_player.IsHuman)
-                {
-                    int x = _tile.X;
-                    foreach (PieceType promotionType in pawn.PromotableTypes)
-                    {
-                        ScriptablePiece Piece = PieceManager.instance.GetPieceOfType(promotionType);
-                        Chesspiece instancePiece = Instantiate(Piece.Piece);
-                        instancePiece.transform.position = new Vector3(x++, _tile.Y + _player.PawnMovementDirection, -1f);
-                        instancePiece.Type = promotionType;
-                        instancePiece.InitPromotionDummy(pawn);
-                        _player.PromotionDummies.Add(instancePiece);
-                    }
-                }
-                // AI promotes randomly.
-                else
-                {
-                    PieceType promotionType = pawn.PromotableTypes.RandomElement();
-                    pawn.Promote(promotionType);
-                }
-            }
-        }
-
-        PieceManager.instance.SetSelectedPiece(null);
-        if (!move.Promotion) PlayerManager.instance.OnPlayerEndTurn();
     }
 
     private void OnMouseDown()

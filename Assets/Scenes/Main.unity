@@ -3323,8 +3323,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c19e191d858e8ae4687be5757f104803, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _initialTurnLimit: 50
   TurnLimit: 50
-  RemainingTurns: 0
   CurrentTurn: 0
   GameState: 0
 --- !u!1 &1545123123

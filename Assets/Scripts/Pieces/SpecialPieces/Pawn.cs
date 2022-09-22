@@ -67,7 +67,8 @@ public class Pawn : Chesspiece
 
             if (Math.Abs(currentY - lastY) == 2 && PlayerManager.instance.HasPlayer2MovedSincePlayer1Turn(pawn.Player, _player, pawn.History.MoveTurns[historyTiles.Count - 1]) == false)
             {
-                _legalMoves.Add(new Move(GridManager.instance.GetTileAtPosition(pawn._tile.X, (currentY + lastY) / 2), _tile, pawn, enPassant: true));
+                Move enPassant = new Move(GridManager.instance.GetTileAtPosition(pawn._tile.X, (currentY + lastY) / 2), _tile, pawn, enPassant: true);
+                _legalMoves.Add(enPassant);
             }
         }
     }

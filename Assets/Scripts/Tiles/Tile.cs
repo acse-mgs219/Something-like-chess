@@ -50,11 +50,11 @@ public class Tile : MonoBehaviour
         {
             if (OccupyingPiece != null || (forPiece is Pawn pawn && pawn.EnPassantTiles.Contains(this)))
             {
-                SetCaptureIndicator(set, forPiece);
+                SetCaptureIndicator(true, forPiece);
             }
             else
             {
-                SetMoveIndicator(set, forPiece);
+                SetMoveIndicator(true, forPiece);
             }
         }
         else
@@ -131,7 +131,8 @@ public class Tile : MonoBehaviour
             }
             else
             {
-                selectedPiece.MoveTo(this);
+                currentPlayer.LegalMoves.Where(m => m.FromTile == selectedPiece.Tile && m.ToTile == this).FirstOrDefault()?.PerformMove();
+                PieceManager.instance.SetSelectedPiece(null);
             }
         }
     }
