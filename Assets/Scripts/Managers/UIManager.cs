@@ -58,16 +58,18 @@ public class UIManager : MonoBehaviour
             int index = colorsPickers.IndexOf(colorsPicker);
 
             colorsPicker.options = options;
-            colorsPicker.value = (int) PlayerManager.instance.Players[index].Color;
             colorsPicker.onValueChanged.AddListener((value) =>
             {
                 OnColorPicked(index, value);
             });
+
+            colorsPicker.value = PlayerPrefs.GetInt($"color{index}");
         }
     }
 
     public void OnColorPicked(int playerIndex, int colorIndex)
     {
+        PlayerPrefs.SetInt($"color{playerIndex}", colorIndex);
         ColorHelper.NamedColor namedColor = (ColorHelper.NamedColor) colorIndex;
         Color color = ColorHelper.Instance.GetColor(namedColor);
         playerLabels[playerIndex].color = color;
