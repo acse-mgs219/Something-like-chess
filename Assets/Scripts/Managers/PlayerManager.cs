@@ -50,6 +50,11 @@ public class PlayerManager : MonoBehaviour
         _players[playerIndex].SetColor(color);
     }
 
+    public void SetPlayerAI(int playerIndex, AITypes.AIType aiType)
+    {
+        _players[playerIndex].SetAI(aiType);
+    }
+
     public void StartPlayerTurn()
     {
         CurrentActivePlayer.LegalMoves.Clear();

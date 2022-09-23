@@ -11,6 +11,9 @@ public class Player : MonoBehaviour
     [SerializeField] string _name;
     public string Name => _name;
 
+    private Intelligence _intelligence;
+    public Intelligence Intelligence => _intelligence;
+
     [SerializeField] bool _isHuman;
     public bool IsHuman => _isHuman;
 
@@ -38,6 +41,18 @@ public class Player : MonoBehaviour
     public void SetIsHuman(bool set)
     {
         _isHuman = set;
+    }
+
+    public void SetAI(AITypes.AIType aiType)
+    {
+        if (_isHuman == false)
+        {
+            _intelligence = (Intelligence) aiType.Construct(this);
+        }
+        else
+        {
+            _intelligence = null;
+        }
     }
 
     public void TrimChecks()
@@ -80,25 +95,11 @@ public class Player : MonoBehaviour
         {
             if (_isHuman == false)
             {
-                StartCoroutine(PlayRandomMove());
+                if (_intelligence != null)
+                {
+                    _intelligence.PlayMove();
+                }
             }
-        }
-    }
-
-    IEnumerator PlayRandomMove()
-    {
-        while (true)
-        {
-            Chesspiece pieceToMove = _pieces.RandomElement();
-            if (pieceToMove.LegalMoves == null || pieceToMove.LegalMoves.Count == 0)
-            {
-                continue;
-            }
-
-            yield return new WaitForSeconds(0.1f);
-
-            pieceToMove.LegalMoves.RandomElement().PerformMove();
-            break;
         }
     }
 }
