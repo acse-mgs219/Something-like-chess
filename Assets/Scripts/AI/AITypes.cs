@@ -11,6 +11,8 @@ public class AITypes
         [ConstructableEnum(typeof(RandomMove))]
         RandomMove,
         [ConstructableEnum(typeof(NaiveEvaluator))]
-        NaiveEvaluator
+        NaiveEvaluator,
+        [ConstructableEnum(typeof(NaiveMover))]
+        NaiveMover
     }
 }

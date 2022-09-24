@@ -3,15 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class NaiveEvaluator : Intelligence
+public class NaiveMover : Intelligence
 {
     public float WaitingTime = 0.1f;
 
-    public NaiveEvaluator(Player player) : base(player, AITypes.AIType.RandomMove) { }
+    public NaiveMover(Player player) : base(player, AITypes.AIType.RandomMove) { }
 
     private float PieceTypeToValue(PieceType type, Tile tile = null)
     {
-        switch(type)
+        switch (type)
         {
             case PieceType.Rook:
                 return 5f;
@@ -91,7 +91,7 @@ public class NaiveEvaluator : Intelligence
 
         List<Move> originalLegalMoves = _player.LegalMoves.Select(m => m).ToList();
 
-        float bestMoveValue = -999f;
+        float bestMoveValue = -999;
         foreach (Move move in originalLegalMoves)
         {
             GridManager.instance.ResetPredictionBoard();
@@ -100,16 +100,26 @@ public class NaiveEvaluator : Intelligence
 
             PlayerManager.instance.CalculateAllPiecesLegalMoves(prediction: true);
 
-            float moveValue = EvaluatePosition(GridManager.instance.PredictionBoard);
+            float moveValue;
+            if (_player.Pieces.Count > 14 || _player.Pieces.Count < 6)
+            {
+                int enemyMoves = PlayerManager.instance.Players.Where(p => p != _player).Sum(p => p.LegalMoves.Count);
+                int ownMoves = _player.LegalMoves.Count;
+
+                moveValue = ownMoves - enemyMoves;
+            }
+            else
+            {
+                moveValue = EvaluatePosition(GridManager.instance.PredictionBoard);
+            }
+
             valuesPerMove[move] = moveValue;
             bestMoveValue = Mathf.Max(bestMoveValue, moveValue);
         }
 
-        Debug.Log($"{this.GetType()}: Best possible move for {_player.Name} leaves them with value {bestMoveValue}.");
+        Debug.Log($"{GetType()}: Best possible move for {_player.Name} leaves them with value {bestMoveValue}.");
 
         Move chosenMove = valuesPerMove.Where(kv => kv.Value == bestMoveValue).RandomElement().Key;
-        //Move chosenMove = valuesPerMove.RandomElementByWeight(kv => kv.Value).Key;
-        //Move bestMove = valuesPerMove.Aggregate((l, r) => l.Value > r.Value ? l : r).Key;
 
         _player.StartCoroutine(PlayMove(chosenMove));
     }
