@@ -132,10 +132,10 @@ public class Move
                         movingPiece.Player.PromotionDummies.Add(instancePiece);
                     }
                 }
-                // AI promotes randomly.
+                // AI promotes to queen always. #TODO: Add way for AI to choose promotion?
                 else
                 {
-                    PieceType promotionType = pawn.PromotableTypes.RandomElement();
+                    PieceType promotionType = PieceType.Queen;
                     pawn.Promote(promotionType);
                 }
             }

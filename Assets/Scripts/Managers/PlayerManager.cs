@@ -60,7 +60,6 @@ public class PlayerManager : MonoBehaviour
 
     public void StartPlayerTurn()
     {
-        CurrentActivePlayer.LegalMoves.Clear();
         CalculateAllPiecesLegalMoves();
         CurrentActivePlayer.StartTurn();
     }
@@ -79,21 +78,25 @@ public class PlayerManager : MonoBehaviour
         GameManager.instance.ChangeState(GameState.MakeMoves);
     }
 
-    public void CalculateAllPiecesLegalMoves()
+    public void CalculateAllPiecesLegalMoves(bool prediction = false)
     {
+        Tile[,] board = prediction ? GridManager.instance.PredictionBoard : GridManager.instance.Board;
+
         foreach (Player player in Players.Where(p => p != CurrentActivePlayer))
         {
+            player.LegalMoves.Clear();
             foreach (Chesspiece piece in player.Pieces)
             {
-                piece.CalculateLegalMoves(GridManager.instance.Board);
+                piece.CalculateLegalMoves(board);
                 player.LegalMoves.AddRange(piece.LegalMoves);
             }
         }
 
+        CurrentActivePlayer.LegalMoves.Clear();
         // We must calculate the moves of the current active player last, so that they will know if they are in check or can castle.
         foreach (Chesspiece piece in CurrentActivePlayer.Pieces)
         {
-            piece.CalculateLegalMoves(GridManager.instance.Board);
+            piece.CalculateLegalMoves(board);
             CurrentActivePlayer.LegalMoves.AddRange(piece.LegalMoves);
         }
     }

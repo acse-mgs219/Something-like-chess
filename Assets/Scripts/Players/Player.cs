@@ -62,7 +62,6 @@ public class Player : MonoBehaviour
         foreach (Move move in _legalMoves)
         {
             GridManager.instance.ResetPredictionBoard();
-            Tile[,] grid = GridManager.instance.PredictionBoard;
 
             move.PerformMove(prediction: true);
 
