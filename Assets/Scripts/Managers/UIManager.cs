@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using TMPro;
@@ -45,8 +46,7 @@ public class UIManager : MonoBehaviour
 
             toggle.onValueChanged.AddListener((value) =>
             {
-                PlayerPrefs.SetInt($"player{index}Human", value ? 1 : 0);
-                PlayerManager.instance.SetPlayerHuman(index, value);
+                OnHumanToggled(index, value);
             });
 
             toggle.isOn = PlayerPrefs.GetInt($"player{index}Human") == 1;
@@ -91,7 +91,19 @@ public class UIManager : MonoBehaviour
                 OnAIPicked(index, value);
             });
 
+            aiPicker.enabled = playerHumanToggles[index].isOn == false;
             aiPicker.value = PlayerPrefs.GetInt($"AI{index}");
+            OnAIPicked(index, aiPicker.value); // Need to call manually because won't be called if value above is set to 0 which is its default, but we still want to init.
+        }
+    }
+
+    public void OnHumanToggled(int playedIndex, bool human)
+    {
+        PlayerPrefs.SetInt($"player{playedIndex}Human", human ? 1 : 0);
+        PlayerManager.instance.SetPlayerHuman(playedIndex, human);
+        if (playedIndex < aiPickers.Count)
+        {
+            aiPickers[playedIndex].enabled = !human;
         }
     }
 

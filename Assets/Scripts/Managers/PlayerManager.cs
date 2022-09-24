@@ -35,7 +35,10 @@ public class PlayerManager : MonoBehaviour
 
     public void Init()
     {
-        // #TODO: Nothing to be done when setting up players yet?
+        foreach (Player player in _players)
+        {
+            player.Init();
+        }
 
         StartPlayerTurn();
     }

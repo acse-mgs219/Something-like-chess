@@ -11,6 +11,8 @@ public class Player : MonoBehaviour
     [SerializeField] string _name;
     public string Name => _name;
 
+    private AITypes.AIType _aiType;
+
     private Intelligence _intelligence;
     public Intelligence Intelligence => _intelligence;
 
@@ -33,6 +35,11 @@ public class Player : MonoBehaviour
 
     public bool IsInCheck = false;
 
+    public void Init()
+    {
+        _intelligence = (Intelligence) _aiType.Construct(this);
+    }
+
     public void SetColor(NamedColor color)
     {
         _color = color;
@@ -45,14 +52,7 @@ public class Player : MonoBehaviour
 
     public void SetAI(AITypes.AIType aiType)
     {
-        if (_isHuman == false)
-        {
-            _intelligence = (Intelligence) aiType.Construct(this);
-        }
-        else
-        {
-            _intelligence = null;
-        }
+        _aiType = aiType;
     }
 
     public void TrimChecks()
