@@ -4,8 +4,6 @@ using UnityEngine;
 
 public class RandomPiece : Intelligence
 {
-    public float WaitingTime = 1f;
-
     public RandomPiece(Player player) : base(player, AITypes.AIType.RandomPiece) { }
 
 
@@ -30,7 +28,7 @@ public class RandomPiece : Intelligence
                 continue;
             }
 
-            yield return new WaitForSeconds(WaitingTime);
+            yield return new WaitForSeconds(waitingTime);
 
             pieceToMove.LegalMoves.RandomElement().PerformMove();
             break;

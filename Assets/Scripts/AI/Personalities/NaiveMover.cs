@@ -5,8 +5,6 @@ using UnityEngine;
 
 public class NaiveMover : Intelligence
 {
-    public float WaitingTime = 0.1f;
-
     public NaiveMover(Player player) : base(player, AITypes.AIType.RandomMove) { }
 
     private float PieceTypeToValue(PieceType type, Tile tile = null)
@@ -126,7 +124,7 @@ public class NaiveMover : Intelligence
 
     IEnumerator PlayMove(Move move)
     {
-        yield return new WaitForSeconds(WaitingTime);
+        yield return new WaitForSeconds(waitingTime);
 
         move.PerformMove();
     }

@@ -34,6 +34,7 @@ public class Player : MonoBehaviour
     public int PawnMovementDirection => _pawnMovementDirection;
 
     public bool IsInCheck = false;
+    public bool IsChoosingPromotion => PromotionDummies.Count != 0;
 
     public void Init()
     {

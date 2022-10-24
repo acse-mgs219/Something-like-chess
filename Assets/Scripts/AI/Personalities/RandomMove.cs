@@ -4,8 +4,6 @@ using UnityEngine;
 
 public class RandomMove : Intelligence
 {
-    public float WaitingTime = 0.1f;
-
     public RandomMove(Player player) : base(player, AITypes.AIType.RandomMove) { }
 
     public override float EvaluatePosition(Tile[,] grid)
@@ -21,7 +19,7 @@ public class RandomMove : Intelligence
 
     IEnumerator PlayRandomMove()
     {
-        yield return new WaitForSeconds(WaitingTime);
+        yield return new WaitForSeconds(waitingTime);
 
         _player.LegalMoves.RandomElement().PerformMove();
     }

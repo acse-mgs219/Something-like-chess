@@ -61,6 +61,8 @@ public class PlayerManager : MonoBehaviour
     public void StartPlayerTurn()
     {
         CalculateAllPiecesLegalMoves();
+        // #TODO: Maybe on a check move we play both the move sound and the check sound?
+        SoundManager.instance.Play(CurrentActivePlayer.IsInCheck ? SoundManager.instance.checkSound : SoundManager.instance.moveSound);
         CurrentActivePlayer.StartTurn();
     }
 
