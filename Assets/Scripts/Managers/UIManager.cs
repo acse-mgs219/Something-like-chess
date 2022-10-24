@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using TMPro;
@@ -21,6 +22,7 @@ public class UIManager : MonoBehaviour
     [HideInInspector] public List<TextMeshProUGUI> playerLabels;
     [HideInInspector] public List<Toggle> playerHumanToggles;
     [HideInInspector] public List<TMP_Dropdown> colorsPickers;
+    [HideInInspector] public List<TMP_Dropdown> aiPickers;
 
     private void Start()
     {
@@ -39,31 +41,69 @@ public class UIManager : MonoBehaviour
 
         foreach (Toggle toggle in playerHumanToggles)
         {
+            // Cannot do a "for int i = ..." loop because the delegates all get stuck with the last value of i.
+            int index = playerHumanToggles.IndexOf(toggle);
+
             toggle.onValueChanged.AddListener((value) =>
             {
-                PlayerManager.instance.SetPlayerHuman(playerHumanToggles.IndexOf(toggle), value);
+                OnHumanToggled(index, value);
             });
+
+            toggle.isOn = PlayerPrefs.GetInt($"player{index}Human") == 1;
         }
 
-        List<TMP_Dropdown.OptionData> options = new List<TMP_Dropdown.OptionData>();
+        List<TMP_Dropdown.OptionData> colorOptions = new List<TMP_Dropdown.OptionData>();
         foreach (string colorName in Enum.GetNames(typeof(ColorHelper.NamedColor)))
         {
-            options.Add(new TMP_Dropdown.OptionData(colorName));
+            colorOptions.Add(new TMP_Dropdown.OptionData(colorName));
         }
-        colorsPickers = startupPanel.GetComponentsInChildren<TMP_Dropdown>().ToList();
+        colorsPickers = startupPanel.GetComponentsInChildren<TMP_Dropdown>().Where(tmp => tmp.name == "ColorsPicker").ToList();
 
         foreach (TMP_Dropdown colorsPicker in colorsPickers)
         {
             // Cannot do a "for int i = ..." loop because the delegates all get stuck with the last value of i.
             int index = colorsPickers.IndexOf(colorsPicker);
 
-            colorsPicker.options = options;
+            colorsPicker.options = colorOptions;
             colorsPicker.onValueChanged.AddListener((value) =>
             {
                 OnColorPicked(index, value);
             });
 
             colorsPicker.value = PlayerPrefs.GetInt($"color{index}");
+        }
+
+        List<TMP_Dropdown.OptionData> aiOptions = new List<TMP_Dropdown.OptionData>();
+        foreach (string aiName in Enum.GetNames(typeof(AITypes.AIType)))
+        {
+            aiOptions.Add(new TMP_Dropdown.OptionData(aiName));
+        }
+        aiPickers = startupPanel.GetComponentsInChildren<TMP_Dropdown>().Where(tmp => tmp.name == "AIPicker").ToList();
+
+        foreach (TMP_Dropdown aiPicker in aiPickers)
+        {
+            // Cannot do a "for int i = ..." loop because the delegates all get stuck with the last value of i.
+            int index = aiPickers.IndexOf(aiPicker);
+
+            aiPicker.options = aiOptions;
+            aiPicker.onValueChanged.AddListener((value) =>
+            {
+                OnAIPicked(index, value);
+            });
+
+            aiPicker.enabled = playerHumanToggles[index].isOn == false;
+            aiPicker.value = PlayerPrefs.GetInt($"AI{index}");
+            OnAIPicked(index, aiPicker.value); // Need to call manually because won't be called if value above is set to 0 which is its default, but we still want to init.
+        }
+    }
+
+    public void OnHumanToggled(int playedIndex, bool human)
+    {
+        PlayerPrefs.SetInt($"player{playedIndex}Human", human ? 1 : 0);
+        PlayerManager.instance.SetPlayerHuman(playedIndex, human);
+        if (playedIndex < aiPickers.Count)
+        {
+            aiPickers[playedIndex].enabled = !human;
         }
     }
 
@@ -75,6 +115,14 @@ public class UIManager : MonoBehaviour
         playerLabels[playerIndex].color = color;
 
         PlayerManager.instance.SetPlayerColor(playerIndex, namedColor);
+    }
+
+    public void OnAIPicked(int playerIndex, int aiIndex)
+    {
+        PlayerPrefs.SetInt($"AI{playerIndex}", aiIndex);
+        AITypes.AIType aiType = (AITypes.AIType) aiIndex;
+
+        PlayerManager.instance.SetPlayerAI(playerIndex, aiType);
     }
 
     public void AnnounceWinner()

@@ -11,6 +11,11 @@ public class Player : MonoBehaviour
     [SerializeField] string _name;
     public string Name => _name;
 
+    private AITypes.AIType _aiType;
+
+    private Intelligence _intelligence;
+    public Intelligence Intelligence => _intelligence;
+
     [SerializeField] bool _isHuman;
     public bool IsHuman => _isHuman;
 
@@ -29,6 +34,12 @@ public class Player : MonoBehaviour
     public int PawnMovementDirection => _pawnMovementDirection;
 
     public bool IsInCheck = false;
+    public bool IsChoosingPromotion => PromotionDummies.Count != 0;
+
+    public void Init()
+    {
+        _intelligence = (Intelligence) _aiType.Construct(this);
+    }
 
     public void SetColor(NamedColor color)
     {
@@ -40,6 +51,11 @@ public class Player : MonoBehaviour
         _isHuman = set;
     }
 
+    public void SetAI(AITypes.AIType aiType)
+    {
+        _aiType = aiType;
+    }
+
     public void TrimChecks()
     {
         List<Move> movesToRemove = new List<Move>();
@@ -47,7 +63,6 @@ public class Player : MonoBehaviour
         foreach (Move move in _legalMoves)
         {
             GridManager.instance.ResetPredictionBoard();
-            Tile[,] grid = GridManager.instance.PredictionBoard;
 
             move.PerformMove(prediction: true);
 
@@ -80,25 +95,11 @@ public class Player : MonoBehaviour
         {
             if (_isHuman == false)
             {
-                StartCoroutine(PlayRandomMove());
+                if (_intelligence != null)
+                {
+                    _intelligence.PlayMove();
+                }
             }
-        }
-    }
-
-    IEnumerator PlayRandomMove()
-    {
-        while (true)
-        {
-            Chesspiece pieceToMove = _pieces.RandomElement();
-            if (pieceToMove.LegalMoves == null || pieceToMove.LegalMoves.Count == 0)
-            {
-                continue;
-            }
-
-            yield return new WaitForSeconds(0.1f);
-
-            pieceToMove.LegalMoves.RandomElement().PerformMove();
-            break;
         }
     }
 }

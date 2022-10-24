@@ -13,6 +13,10 @@ public class GameManager : MonoBehaviour
     public int RemainingTurns => TurnLimit - CurrentTurn;
     public int CurrentTurn;
 
+    public bool instantMoves;
+    public int pieceSpeed;
+    public float turnTime;
+
     public GameState GameState;
 
     void Awake()
@@ -57,6 +61,11 @@ public class GameManager : MonoBehaviour
                 UIManager.instance.AnnounceWinner();
                 break;
         }
+    }
+
+    public void ResetTurnLimit()
+    {
+        TurnLimit = InitialTurnLimit + CurrentTurn;
     }
 }
 

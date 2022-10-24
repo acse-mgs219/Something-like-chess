@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 using UnityEngine;
 using UnityEssentials.Extensions;
 
@@ -43,6 +44,11 @@ public abstract class Chesspiece : MonoBehaviour
     public bool IsPromotionDummy = false;
 
     private Rigidbody2D _body;
+    public bool IsInMotion => _body.velocity != Vector2.zero;
+    private float _deltaToDestination = float.PositiveInfinity;
+
+    // #TODO: REWORK: Remove this, use event system instead!
+    public Move AssociatedMove;
 
     public virtual void CalculateLegalMoves(Tile[,] grid)
     {
@@ -149,12 +155,21 @@ public abstract class Chesspiece : MonoBehaviour
 
     private void Update()
     {
-        if (!IsPredictionCopy && _body.velocity != Vector2.zero)
+        if (!IsPredictionCopy && IsInMotion)
         {
-            if (transform.position.x.ApproximatelyEquals(_tile.X, 0.3f) && transform.position.y.ApproximatelyEquals(_tile.Y, 0.3f))
+            float newDeltaDoDestination = new Vector2(transform.position.x - _tile.X, transform.position.y - _tile.Y).magnitude;
+            bool reached = newDeltaDoDestination.ApproximatelyEquals(0, 0.3f);
+            bool exceeded = newDeltaDoDestination > _deltaToDestination;
+            if (reached || exceeded)
             {
                 transform.position = new Vector3(_tile.X, _tile.Y, transform.position.z);
                 _body.velocity = Vector2.zero;
+                _deltaToDestination = float.PositiveInfinity;
+                AssociatedMove.FinishRealMove();
+            }
+            else
+            {
+                _deltaToDestination = newDeltaDoDestination;
             }
         }
     }

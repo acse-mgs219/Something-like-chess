@@ -79,42 +79,45 @@ public class Move
         }
     }
 
+    public virtual void FinishRealMove()
+    {
+        if (_castle == false && _targetPiece != null)
+        {
+            _targetPiece.Destroy();
+            GameManager.instance.ResetTurnLimit();
+        }
+
+        if ((_promotion && _toTile.OccupyingPiece.Player.IsChoosingPromotion) == false)
+        {
+            PlayerManager.instance.OnPlayerEndTurn();
+        }
+    }
+
     protected virtual void RealMove()
     {
         Chesspiece movingPiece = _fromTile.OccupyingPiece;
+
+        movingPiece.AssociatedMove = this;
 
         movingPiece.History.RecordMove(this);
 
         movingPiece.PlaceAt(_toTile, move: false);
 
-        movingPiece.SetInMotion((new Vector2(
-            Translation.x,
-            Translation.y
-        ).normalized) * 25);
-
-        if (_castle == false && _targetPiece != null)
-        {
-            _targetPiece.Destroy();
-        }
-        else if (_castle)
+        if (_castle)
         {
             if (_targetPiece != null)
             {
                 int destinationX = (_toTile.X + _fromTile.X) / 2;
                 Tile targetTile = GridManager.instance.Board[destinationX, _toTile.Y];
-                Move rookPartOfCastle = new Move(targetTile, _targetPiece.Tile, _targetPiece, castle: true);
+                Move rookPartOfCastle = new Move(targetTile, _targetPiece.Tile, castle: true);
                 rookPartOfCastle.RealMove();
-            }
-            else
-            {
-                return;
             }
         }
 
-        // Game ends in draw if 50 turns go by without a pawn move.
+        // Game ends in draw if 50 turns go by without a pawn move or capture.
         if (movingPiece is Pawn pawn)
         {
-            GameManager.instance.TurnLimit = GameManager.instance.CurrentTurn + GameManager.instance.InitialTurnLimit;
+            GameManager.instance.ResetTurnLimit();
 
             if (_promotion)
             {
@@ -132,16 +135,23 @@ public class Move
                         movingPiece.Player.PromotionDummies.Add(instancePiece);
                     }
                 }
-                // AI promotes randomly.
+                // AI promotes to queen always. #TODO: Add way for AI to choose promotion?
                 else
                 {
-                    PieceType promotionType = pawn.PromotableTypes.RandomElement();
+                    PieceType promotionType = PieceType.Queen;
                     pawn.Promote(promotionType);
                 }
             }
         }
 
-        // PieceManager.instance.SetSelectedPiece(null);
-        if (!_promotion) PlayerManager.instance.OnPlayerEndTurn();
+        if (GameManager.instance.instantMoves)
+        {
+            movingPiece.SetInMotion(Translation.normalized * GameManager.instance.pieceSpeed);
+        }
+        else
+        {
+            movingPiece.transform.position = new Vector3(_toTile.X, _toTile.Y, -1f);
+            FinishRealMove();
+        }
     }
 }

@@ -111,7 +111,7 @@ public class Tile : MonoBehaviour
     {
         Player currentPlayer = PlayerManager.instance.CurrentActivePlayer;
 
-        if (currentPlayer.IsHuman)
+        if (currentPlayer.IsHuman && currentPlayer.IsChoosingPromotion == false)
         {
             Chesspiece selectedPiece = PieceManager.instance.SelectedPiece;
 

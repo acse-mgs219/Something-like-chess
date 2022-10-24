@@ -81,7 +81,7 @@ public class Pawn : Chesspiece
 
         _player.PromotionDummies.ForEach(d => Destroy(d.gameObject));
         _player.PromotionDummies.Clear();
+        AssociatedMove.FinishRealMove();
         Destroy();
-        PlayerManager.instance.OnPlayerEndTurn();
     }
 }
