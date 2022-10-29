@@ -109,30 +109,33 @@ public class Tile : MonoBehaviour
 
     private void OnMouseDown()
     {
-        Player currentPlayer = PlayerManager.instance.CurrentActivePlayer;
-
-        if (currentPlayer.IsHuman && currentPlayer.IsChoosingPromotion == false)
+        if (GameManager.instance.GameState == GameState.MakeMoves)
         {
-            Chesspiece selectedPiece = PieceManager.instance.SelectedPiece;
+            Player currentPlayer = PlayerManager.instance.CurrentActivePlayer;
 
-            if (selectedPiece is null)
+            if (currentPlayer.IsHuman && currentPlayer.IsChoosingPromotion == false)
             {
-                if (OccupyingPiece is null)
-                {
-                    return;
-                }
+                Chesspiece selectedPiece = PieceManager.instance.SelectedPiece;
 
-                if (OccupyingPiece.Player != currentPlayer)
+                if (selectedPiece is null)
                 {
-                    return;
-                }
+                    if (OccupyingPiece is null)
+                    {
+                        return;
+                    }
 
-                PieceManager.instance.SetSelectedPiece(OccupyingPiece);
-            }
-            else
-            {
-                currentPlayer.LegalMoves.Where(m => m.FromTile == selectedPiece.Tile && m.ToTile == this).FirstOrDefault()?.PerformMove();
-                PieceManager.instance.SetSelectedPiece(null);
+                    if (OccupyingPiece.Player != currentPlayer)
+                    {
+                        return;
+                    }
+
+                    PieceManager.instance.SetSelectedPiece(OccupyingPiece);
+                }
+                else
+                {
+                    currentPlayer.LegalMoves.Where(m => m.FromTile == selectedPiece.Tile && m.ToTile == this).FirstOrDefault()?.PerformMove();
+                    PieceManager.instance.SetSelectedPiece(null);
+                }
             }
         }
     }
@@ -146,5 +149,15 @@ public class Tile : MonoBehaviour
     private void OnMouseExit()
     {
         IsMouseOver = false;
+    }
+
+    public void Destroy()
+    {
+        if (OccupyingPiece != null)
+        {
+            OccupyingPiece.Destroy();
+        }
+
+        Destroy(gameObject);
     }
 }

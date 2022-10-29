@@ -40,7 +40,7 @@ public class PlayerManager : MonoBehaviour
             player.Init();
         }
 
-        StartPlayerTurn();
+        GameManager.instance.ChangeState(GameState.MakeMoves);
     }
 
     public void SetPlayerHuman(int playerIndex, bool human)

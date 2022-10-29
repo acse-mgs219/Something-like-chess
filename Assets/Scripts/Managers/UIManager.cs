@@ -24,10 +24,23 @@ public class UIManager : MonoBehaviour
     [HideInInspector] public List<TMP_Dropdown> colorsPickers;
     [HideInInspector] public List<TMP_Dropdown> aiPickers;
 
-    private void Start()
+    private void Awake()
     {
         instance = this;
+    }
 
+    private void Start()
+    {
+        Init();
+    }
+
+    public void ShowStartupPanel()
+    {
+        startupPanel.SetActive(true);
+    }
+
+    public void Init()
+    {
         playerLabels = startupPanel.GetComponentsInChildren<TextMeshProUGUI>().Where(tmp => tmp.name == "NameLabel").ToList();
 
         for (int i = 0; i < playerLabels.Count; i++)
@@ -160,6 +173,18 @@ public class UIManager : MonoBehaviour
         }
 
         checkMarker.SetActive(inCheck);
+    }
+
+    public void ReStartGame()
+    {
+        winnerBackground.SetActive(false);
+
+        foreach (Player player in PlayerManager.instance.Players)
+        {
+            player.Destroy();
+        }
+
+        GameManager.instance.ChangeState(GameState.PickPlayers);
     }
 
     public void StartGame()

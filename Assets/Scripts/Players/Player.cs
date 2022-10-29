@@ -102,4 +102,13 @@ public class Player : MonoBehaviour
             }
         }
     }
+
+    public void Destroy()
+    {
+        int piecesCount = Pieces.Count;
+        for(int i = 0; i < piecesCount; i++)
+        {
+            Pieces[0].Destroy();
+        }
+    }
 }

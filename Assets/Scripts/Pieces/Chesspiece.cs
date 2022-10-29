@@ -105,6 +105,18 @@ public abstract class Chesspiece : MonoBehaviour
     // #TODO: Rework this so destroying pieces just moves them to the side of the board and makes them unmoveable.
     public void Destroy()
     {
+        if (_isPredictionCopy == false)
+        {
+            UnityEngine.Debug.Log($"Piece destroyed: {_tile}");
+        }
+
+        _player.Pieces.Remove(this);
+
+        if (_legalMoves != null)
+        {
+            _legalMoves.Clear();
+        }
+
         if (_predictionCopy != null)
         {
             _player.LegalMoves.RemoveAll(m => m.FromTile == _tile);
@@ -114,14 +126,10 @@ public abstract class Chesspiece : MonoBehaviour
         {
             _tile.OccupyingPiece = null;
         }
-        _tile = null;
 
         if (VIP && IsPredictionCopy == false)
         {
             UnityEngine.Debug.LogAssertion("King was captured, this shouldn't have been possible?");
-            _player.Pieces.ForEach(p => Destroy(p));
-            Destroy(_player.gameObject);
-            GameManager.instance.ChangeState(GameState.EndGame);
         }
 
         if (_predictionCopy != null)
@@ -134,8 +142,6 @@ public abstract class Chesspiece : MonoBehaviour
             _originalPiece._predictionCopy = null;
         }
 
-        _player.Pieces.Remove(this);
-        _player = null;
         Destroy(gameObject);
     }
 

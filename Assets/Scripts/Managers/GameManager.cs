@@ -33,16 +33,11 @@ public class GameManager : MonoBehaviour
 
     public void ChangeState(GameState newState)
     {
-        // The game has ended, do nothing.
-        if (GameState == GameState.EndGame)
-        {
-            return;
-        }
-
         GameState = newState;
         switch (GameState)
         {
             case GameState.PickPlayers:
+                UIManager.instance.ShowStartupPanel();
                 break;
             case GameState.GenerateGrid:
                 GridManager.instance.Init();

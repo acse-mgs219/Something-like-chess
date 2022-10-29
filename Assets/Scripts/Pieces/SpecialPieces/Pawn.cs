@@ -81,7 +81,14 @@ public class Pawn : Chesspiece
 
         _player.PromotionDummies.ForEach(d => Destroy(d.gameObject));
         _player.PromotionDummies.Clear();
-        AssociatedMove.FinishRealMove();
+        StartCoroutine(FinishAssociatedMove(AssociatedMove));
         Destroy();
+    }
+
+    IEnumerator FinishAssociatedMove(Move move)
+    {
+        yield return new WaitForSeconds(0.01f);
+
+        move.FinishRealMove();
     }
 }

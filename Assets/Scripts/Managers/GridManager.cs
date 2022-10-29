@@ -155,6 +155,34 @@ public class GridManager : MonoBehaviour
         }
     }
 
+    public void DestroyGrid(bool real)
+    {
+        if (real)
+        {
+            List<Tile> tilesToDestroy = new List<Tile>();
+            foreach (Tile tile in _board)
+            {
+                tilesToDestroy.Add(tile);
+            }
+
+            tilesToDestroy.ForEach(t => t.Destroy());
+
+            _board = null;
+        }
+        else
+        {
+            List<Tile> tilesToDestroy = new List<Tile>();
+            foreach (Tile tile in _predictionBoard)
+            {
+                tilesToDestroy.Add(tile);
+            }
+
+            tilesToDestroy.ForEach(t => t.Destroy());
+
+            _predictionBoard = null;
+        }
+    }
+
     #region UnusedUtilityFunctions
     public List<Tile> GetTilesFittingConstraint(Func<Tile, Boolean> constraint, bool real = true)
     {
