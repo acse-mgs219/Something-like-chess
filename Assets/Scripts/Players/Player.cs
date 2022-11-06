@@ -8,6 +8,9 @@ using static UnityEssentials.Extensions.ColorHelper;
 
 public class Player : MonoBehaviour
 {
+    private int _score = 0;
+    public int Score => _score;
+
     [SerializeField] string _name;
     public string Name => _name;
 
@@ -110,5 +113,10 @@ public class Player : MonoBehaviour
         {
             Pieces[0].Destroy();
         }
+    }
+
+    public void IncreaseScore(int value)
+    {
+        _score += value;
     }
 }

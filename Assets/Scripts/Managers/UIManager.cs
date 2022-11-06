@@ -7,8 +7,32 @@ using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+//using UnityEngine.UIElements;
 using UnityEssentials.Extensions;
-using static System.Collections.Specialized.BitVector32;
+
+public class ScoreLabel
+{
+    private string _key;
+    public string Key => _key;
+
+    private TextMeshProUGUI _playerLabel;
+    private TextMeshProUGUI _scoreText;
+    private int _scoreValue;
+
+    public void IncreaseScoreValue(int delta)
+    {
+        _scoreValue += delta;
+        _scoreText.text = _scoreValue.ToString();
+    }
+
+    public ScoreLabel(string key, TextMeshProUGUI playerLabel, TextMeshProUGUI scoreText, int scoreValue)
+    {
+        _key = key;
+        _playerLabel = playerLabel;
+        _scoreText = scoreText;
+        _scoreValue = scoreValue;
+    }
+}
 
 public class UIManager : MonoBehaviour
 {
@@ -18,11 +42,15 @@ public class UIManager : MonoBehaviour
     public GameObject winnerBackground;
     public GameObject checkMarker;
     public GameObject startupPanel;
+    public GameObject scorePanel;
 
     [HideInInspector] public List<TextMeshProUGUI> playerLabels;
+    [HideInInspector] public List<ScoreLabel> scoreLabels;
     [HideInInspector] public List<Toggle> playerHumanToggles;
     [HideInInspector] public List<TMP_Dropdown> colorsPickers;
     [HideInInspector] public List<TMP_Dropdown> aiPickers;
+
+    public Color averagePlayerColor;
 
     private void Awake()
     {
@@ -39,16 +67,40 @@ public class UIManager : MonoBehaviour
         startupPanel.SetActive(true);
     }
 
+    private void AddScoreLabel(string key, Color color)
+    {
+        TextMeshProUGUI playerLabel = scorePanel.GetComponentsInChildren<TextMeshProUGUI>().Where(tmp => tmp.name == $"Name_{key}").First();
+        TextMeshProUGUI scoreLabel = scorePanel.GetComponentsInChildren<TextMeshProUGUI>().Where(tmp => tmp.name == $"Score_{key}").First();
+        playerLabel.color = color;
+        scoreLabel.color = color;
+
+        scoreLabels.Add(new ScoreLabel(key, playerLabel, scoreLabel, 0));
+    }
+
     public void Init()
     {
         playerLabels = startupPanel.GetComponentsInChildren<TextMeshProUGUI>().Where(tmp => tmp.name == "NameLabel").ToList();
 
+        List<Color> allPlayerColors = new List<Color>();
+        List<Player> players = PlayerManager.instance.Players;
+
         for (int i = 0; i < playerLabels.Count; i++)
         {
-            List<Player> players = PlayerManager.instance.Players;
-
-            playerLabels[i].color = ColorHelper.Instance.GetColor(players[i].Color);
+            Color playerColor = ColorHelper.Instance.GetColor(players[i].Color);
+            playerLabels[i].color = playerColor;
+            allPlayerColors.Add(playerColor);
         }
+
+        averagePlayerColor = allPlayerColors.Average();
+
+        scoreLabels = new List<ScoreLabel>();
+
+        foreach (Player player in players)
+        {
+            AddScoreLabel(player.Name.ReplaceWhitespace(""), ColorHelper.Instance.GetColor(player.Color));
+        }
+
+        AddScoreLabel("Ties", averagePlayerColor);
 
         playerHumanToggles = startupPanel.GetComponentsInChildren<Toggle>().ToList();
 
@@ -147,6 +199,8 @@ public class UIManager : MonoBehaviour
         if (survivingPlayers.Count == 1)
         {
             Player winner = survivingPlayers.First();
+            winner.IncreaseScore(2);
+            scoreLabels.First(sl => sl.Key == winner.Name).IncreaseScoreValue(1);
 
             backgroundColor = ColorHelper.Instance.GetColor(winner.Color);
             winnerText.text = $"The winner is {winner.Name}";
@@ -156,6 +210,8 @@ public class UIManager : MonoBehaviour
             List<Color> colors = survivingPlayers.Select(p => ColorHelper.Instance.GetColor(p.Color)).ToList();
             backgroundColor = colors.Average();
             winnerText.text = "The game ends in a tie!";
+            survivingPlayers.ForEach(p => p.IncreaseScore(1));
+            scoreLabels.First(sl => sl.Key == "Ties").IncreaseScoreValue(1);
         }
 
         background.color = new Color(backgroundColor.r, backgroundColor.g, backgroundColor.b, background.color.a);
